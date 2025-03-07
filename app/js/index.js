@@ -1303,6 +1303,39 @@ const icons = icons_unmapped(L);
         }
     });
 
+    // Extend polyline to have dynamic tooltip text
+    L.Draw.Polyline = L.Draw.Polyline.extend({
+    	_getTooltipText: function () {
+            var showLength = this.options.showLength,
+                labelText, distanceStr, headingStr;
+            if (this._markers.length === 0) {
+                labelText = {
+                    text: L.drawLocal.draw.handlers.polyline.tooltip.start
+                };
+            } else {
+                var oldlatlng = this._markers[this._markers.length - 1].getLatLng();
+                var latlng = this._currentLatLng;
+                distanceStr = showLength ? this._getMeasurementString() : '';
+                headingStr = (Math.round(calc.heading(oldlatlng, latlng) * 10) / 10).toFixed(1);
+    
+                if (this._markers.length === 1) {
+                    labelText = {
+                        //text: L.drawLocal.draw.handlers.polyline.tooltip.cont,
+                        text: 'Heading: ' + headingStr + '&deg<br />Click to continue the flight plan / polyline',
+                        subtext: distanceStr
+                    };
+                } else {
+                    labelText = {
+                        //text: L.drawLocal.draw.handlers.polyline.tooltip.end,
+                        text: 'Heading: ' + headingStr + '&deg<br />Click last point to finish flight plan / polyline',
+                        subtext: distanceStr
+                    };
+                }
+            }
+            return labelText;
+        }
+    });
+
     // Extend the draw UI with our own text
     L.drawLocal.draw.toolbar.buttons.polyline = 'Map a flight / Draw a polyline';
     L.drawLocal.draw.handlers.polyline.tooltip.start = 'Click to start a flight plan / polyline';
