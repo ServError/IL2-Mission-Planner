@@ -4,6 +4,10 @@ Welcome to the IL2 Mission Planner Revived repository. This repository houses th
 
 Unlike the abandoned il2missionplanner.com project, this fork aims to make optional the dependency on the Streaming and API servers (the latter of which only loses automatic JSON fetch functionality) and generally streamline installation for Github Pages and locally hosted setups based on my own working configuration. Streaming (AKA live plan sharing) can optionally be enabled but requires the use of redis and webdis as a backend.
 
+## New in 3.0
+
+Setup has been simplified and relies entirely on npm now. The project has moved towards ES module standards in part to prepare for Leaflet 2.0. Depedencies have been updated and cleaned up and Leaflet is now 1.9.4.
+
 ## Issues and Enhancements
 
 If you'd like to report a bug or request an enhancement, please [open an issue](https://github.com/ServError/il2missionplanner.com/issues).
@@ -14,7 +18,7 @@ Interested in contributing to this tool? Feel free to fork the project and open 
 
 ## Setting up
 
-Clone the repository. In the repository directory, run `git submodule init` followed by `git submodule update -r`. Then run `npm ci` followed by `bower install` to fetch dependencies. Edit conf/conf.json to match your desired setup. I recommend starting with the defaults (streaming false and api set to NONE) and just substituting in your domain name. Run `npm run dist` to generate the files to push to your web server and optionally run `npm run tiles` to fetch the tiles from the 'dist' folder of [the tiles repo](https://github.com/ServError/tiles.il2missionplanner.com) and drop them into the tiles subdirectory of the output. Tiles only need to be fetched once.
+Clone the repository. In the repository directory, run `npm ci` to fetch dependencies. Edit conf/conf.json to match your desired setup. I recommend starting with the defaults (streaming false and api set to NONE) and just substituting in your domain name. Run `npm run dist` to generate the files to push to your web server and optionally run `npm run tiles` to fetch the tiles from the 'dist' folder of [the tiles repo](https://github.com/ServError/tiles.il2missionplanner.com) and drop them into the tiles subdirectory of the output. Tiles only need to be fetched once.
 
 ## Live Development
 
