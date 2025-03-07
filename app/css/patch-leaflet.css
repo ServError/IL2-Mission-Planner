@@ -39,3 +39,6 @@
     content: "\f12d"; /* fa-eraser */
     font-family: FontAwesome;
 }
+.leaflet-container {
+    font-size: 1.20rem;
+  }

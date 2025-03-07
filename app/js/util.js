@@ -1,6 +1,9 @@
-module.exports = (function() {
+import url from "url";
+import calc from "./calc.js";
+import pkg from 'file-saver';
+const { saveAs } = pkg;
 
-    var calc = require('./calc.js');
+const util = (function() {
 
     const UNIT_MAP = {
         metric: {
@@ -134,7 +137,6 @@ module.exports = (function() {
         },
 
         validUrl: function(string) {
-            var url = require('url');
             var result;
   
             try {
@@ -197,21 +199,10 @@ module.exports = (function() {
         },
         // End class functions
 
-        // Download function taken from here https://stackoverflow.com/questions/2897619/using-html5-javascript-to-generate-and-save-a-file
         download: function(filename, text) {
-            var pom = document.createElement('a');
-            pom.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
-            pom.setAttribute('download', filename);
-
-            if (document.createEvent) {
-                var event = document.createEvent('MouseEvents');
-                event.initEvent('click', true, true);
-                pom.dispatchEvent(event);
-            }
-            else {
-                pom.click();
-            }
-        }, // End download function
+            var blob = new Blob([text], {type: "text/plain;charset=utf-8"});
+            saveAs(blob, filename);
+        },
 
         csvConvert: function(array) {
             var csv="";
@@ -284,3 +275,5 @@ module.exports = (function() {
 
     };
 })();
+
+export default util;

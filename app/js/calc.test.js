@@ -1,6 +1,6 @@
-var assert = require('chai').assert;
+import { assert } from 'chai';
 
-var calc = require('./calc.js');
+import calc from './calc.js';
 
 function strLatLng(latLng) {
     return '('+latLng.lat+','+latLng.lng+')';

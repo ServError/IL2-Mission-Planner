@@ -1,16 +1,30 @@
+import 'font-awesome/css/font-awesome.min.css';
+import 'leaflet/dist/leaflet.css';
+import 'leaflet-draw/dist/leaflet.draw.css';
+import 'leaflet-modal/dist/leaflet.modal.min.css';
+import 'skeleton-css/css/normalize.css';
+import 'skeleton-css/css/skeleton.css';
+import '../css/index.css';
+
+import L from "leaflet";
+import 'leaflet-draw';
+import 'leaflet-polylinedecorator';
+import 'leaflet-modal';
+import { Validatinator } from "validatinator";
+import 'leaflet-textpath';
+import calc from "./calc.js";
+import content from "./content.js";
+import util from "./util.js";
+import webdis from "./webdis.js";
+import "./controls.js";
+import conf from '../../dist/conf.json' with { type: "json" };
+import icons_unmapped from "./icons.js"; //(L)?
+
+const icons = icons_unmapped(L);
+
 (function() {
 
     'use strict';
-
-    var fs = require('fs');
-    var content = require('./content.js');
-    var calc = require('./calc.js');
-    var util = require('./util.js');
-    var icons = require('./icons.js')(L);
-    var webdis = require('./webdis.js');
-    require('./controls.js');
-
-    var conf = JSON.parse(fs.readFileSync('dist/conf.json', 'utf8'));
 
     const
         EXPORT_REV = 2,
@@ -388,7 +402,7 @@
             var midpoint = calc.midpoint(coords[i], coords[i+1]);
             var time = util.formatTime(calc.time(route.speeds[i], airDistance));
             var markerContent = util.formatFlightLegMarker(gndDistance, heading, route.speeds[i], time, state.units);
-            var marker =  L.marker(midpoint, {
+            var marker =  L.marker(L.latLng(midpoint[0],midpoint[1]), {
                 altDiff: altDiff,
                 gndDistance: gndDistance,
                 heading: heading,

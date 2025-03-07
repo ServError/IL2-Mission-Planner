@@ -1,5 +1,5 @@
 {
-    "esversion": 6,
+    "esversion": 11,
     "curly": true,
     "eqeqeq": true,
     "freeze": true,
@@ -23,6 +23,7 @@
         "CustomEvent": true,
         "Option": true,
         "Validatinator": true,
-        "process": true
+        "process": true,
+        "Blob": true
     }
 }

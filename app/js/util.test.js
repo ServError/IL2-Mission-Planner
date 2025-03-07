@@ -1,9 +1,9 @@
-var assert = require('chai').assert;
+import { assert } from 'chai';
 
-var util = require('./util.js');
-var xhrMock = require('xhr-mock');
-xhrMock.setup();
+import util from './util.js';
+//import mock from 'xhr-mock';
 
+//xhr-mock.setup()
 describe('util', function() {
 
     it('must be defined', function() {
@@ -179,6 +179,6 @@ describe('util', function() {
         });
     });
 
-    xhrMock.teardown();
+    //xhr-mock.teardown();
 
 });

@@ -1,9 +1,9 @@
-module.exports = (function() {
-    var fs = require('fs');
-    var util = require('./util.js');
+//import confJson from "./dist/conf.json";
+import util from "./util.js";
+import conf from '../../dist/conf.json' with { type: "json" };
 
-    var fs = require('fs');
-    var conf = JSON.parse(fs.readFileSync('dist/conf.json', 'utf8'));
+const webdis = (function() {
+    //var util = require('./util.js');
 
     const
         WEBDIS_HOST = conf.webdisUrl
@@ -137,3 +137,5 @@ module.exports = (function() {
         }
     };
 })();
+
+export default webdis;

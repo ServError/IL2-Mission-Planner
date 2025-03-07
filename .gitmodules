@@ -1,9 +1,0 @@
-[submodule "app/vendor/Leaflet.label"]
-	path = app/vendor/Leaflet.label
-	url = https://github.com/Leaflet/Leaflet.label.git
-[submodule "app/vendor/Leaflet.TextPath"]
-	path = app/vendor/Leaflet.TextPath
-	url = https://github.com/makinacorpus/Leaflet.TextPath.git
-[submodule "app/vendor/Skeleton"]
-	path = app/vendor/Skeleton
-	url = https://github.com/dhg/Skeleton.git

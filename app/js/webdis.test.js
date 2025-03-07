@@ -1,13 +1,11 @@
-var assert = require('chai').assert;
+import { assert } from 'chai';
+import conf from '../../dist/conf.json' with { type: "json" };
 
 if (!CustomEvent) {
   var CustomEvent = function(name, params){ return params;};
 }
 
-var fs = require('fs');
-var webdis = require('./webdis.js');
-
-var conf = JSON.parse(fs.readFileSync('dist/conf.json', 'utf8'));
+import webdis from './webdis.js';
 
 describe('webdis', function() {
 

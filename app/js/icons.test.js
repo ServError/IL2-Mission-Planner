@@ -1,4 +1,4 @@
-var assert = require('chai').assert;
+import { assert } from 'chai';
 
 var mockLeaflet = {
     icon: function(options) {
@@ -8,7 +8,9 @@ var mockLeaflet = {
         return {options: options};
     }
 }
-var icons = require('./icons.js')(mockLeaflet);
+
+import icons_def from './icons.js';
+const icons = icons_def(mockLeaflet);
 
 describe('icons', function() {
 
