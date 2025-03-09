@@ -152,11 +152,11 @@ describe('util', function() {
             assert.isDefined(util.formatFlightLegMarker);
         });
 
-        var expected = '<div style="background: rgba(100, 100, 100, .75); transform: rotate(26deg);">300.0km | 116&deg;/296&deg; <br/> 300kph | ETE 60:00</div>';
+        var expected = '<div style="background: rgba(100, 100, 100, .75); transform: rotate(26deg);">400kph | 116&deg;/296&deg; <br/> 300.0km | ETE 60:00</div>';
         var given = {
             distance: 300,
             heading: 116,
-            speed: 300,
+            speed: 400,
             time: '60:00'
         }
  
