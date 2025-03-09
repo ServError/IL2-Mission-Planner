@@ -39,6 +39,19 @@
     content: "\f12d"; /* fa-eraser */
     font-family: FontAwesome;
 }
+
+.leaflet-draw-draw-ruler:before {
+    content: "\f07e"; /* fa-arrows-h */
+    font-family: FontAwesome;
+}
+
+.leaflet-draw-toolbar .leaflet-draw-draw-ruler {
+	background-position: -152px -2px;
+}
+
+.leaflet-touch .leaflet-draw-toolbar .leaflet-draw-draw-ruler {
+	background-position: -150px -1px;
+}
 .leaflet-container {
     font-size: 1.20rem;
-  }
+}

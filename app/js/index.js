@@ -10,6 +10,7 @@ import L from "leaflet";
 import 'leaflet-draw';
 import 'leaflet-polylinedecorator';
 import 'leaflet-modal';
+import './drawOverrides.js';
 import { Validatinator } from "validatinator";
 import 'leaflet-textpath';
 import calc from "./calc.js";
@@ -41,6 +42,11 @@ const icons = icons_unmapped(L);
         },
         LINE_OPTIONS = {
             color: RED,
+            weight: 2,
+            opacity: FLIGHT_OPACITY
+        },
+        RULER_OPTIONS = {
+            color: BLACK,
             weight: 2,
             opacity: FLIGHT_OPACITY
         }
@@ -224,7 +230,7 @@ const icons = icons_unmapped(L);
                 element.focus();
                 element.select();
                 L.DomEvent.on(e.modal._container.querySelector('.modal-ok'), 'click', function() {
-                    if (V.passes('flight-turn-form')) {
+                    if (V.validate('flight-turn-form')) {
                         var newAltitude = parseInt(element.value);
                         parentRoute.altitudes[marker.index] = newAltitude;
                         marker.options.altitude = newAltitude;
@@ -291,7 +297,7 @@ const icons = icons_unmapped(L);
                 element.focus();
                 element.select();
                 L.DomEvent.on(e.modal._container.querySelector('.modal-ok'), 'click', function() {
-                    if (V.passes('flight-leg-form')) {
+                    if (V.validate('flight-leg-form')) {
                         var newSpeed = parseInt(element.value);
                         parentRoute.speeds[marker.index] = newSpeed;
                         marker.options.speed = newSpeed;
@@ -1289,6 +1295,10 @@ const icons = icons_unmapped(L);
             marker: {
                 icon: icons.factory(content.default.pointType, content.default.pointColor)
             },
+            ruler: {
+                showRadius: false,
+                shapeOptions: RULER_OPTIONS
+            },
             circlemarker: false
         },
         edit: {
@@ -1302,48 +1312,6 @@ const icons = icons_unmapped(L);
             }
         }
     });
-
-    // Extend polyline to have dynamic tooltip text
-    L.Draw.Polyline = L.Draw.Polyline.extend({
-    	_getTooltipText: function () {
-            var showLength = this.options.showLength,
-                labelText, distanceStr, headingStr;
-            if (this._markers.length === 0) {
-                labelText = {
-                    text: L.drawLocal.draw.handlers.polyline.tooltip.start
-                };
-            } else {
-                var oldlatlng = this._markers[this._markers.length - 1].getLatLng();
-                var latlng = this._currentLatLng;
-                distanceStr = showLength ? this._getMeasurementString() : '';
-                headingStr = (Math.round(calc.heading(oldlatlng, latlng) * 10) / 10).toFixed(1);
-    
-                if (this._markers.length === 1) {
-                    labelText = {
-                        //text: L.drawLocal.draw.handlers.polyline.tooltip.cont,
-                        text: 'Heading: ' + headingStr + '&deg<br />Click to continue the flight plan / polyline',
-                        subtext: distanceStr
-                    };
-                } else {
-                    labelText = {
-                        //text: L.drawLocal.draw.handlers.polyline.tooltip.end,
-                        text: 'Heading: ' + headingStr + '&deg<br />Click last point to finish flight plan / polyline',
-                        subtext: distanceStr
-                    };
-                }
-            }
-            return labelText;
-        }
-    });
-
-    // Extend the draw UI with our own text
-    L.drawLocal.draw.toolbar.buttons.polyline = 'Map a flight / Draw a polyline';
-    L.drawLocal.draw.handlers.polyline.tooltip.start = 'Click to start a flight plan / polyline';
-    L.drawLocal.draw.handlers.polyline.tooltip.cont = 'Click to continue the flight plan / polyline';
-    L.drawLocal.draw.handlers.polyline.tooltip.end = 'Click last point to finish flight plan / polyline';
-
-    // Fix dragging while drawing polyline/polygon
-    L.Draw.Polyline.prototype._onTouch = L.Util.falseFn;
     
     map.addControl(drawControl);
 
@@ -1809,7 +1777,7 @@ const icons = icons_unmapped(L);
                             var gridElement = document.getElementById('grid-input');
                             gridElement.focus();
                             L.DomEvent.on(e.modal._container.querySelector('.modal-ok'), 'click', function() {
-                                if (V.passes('grid-jump-form')) {
+                                if (V.validate('grid-jump-form')) {
                                     var grid = gridElement.value;
                                     var viewLatLng = calc.gridLatLng(grid, mapConfig);
                                     map.flyTo(viewLatLng, mapConfig.gridHopZoom);
