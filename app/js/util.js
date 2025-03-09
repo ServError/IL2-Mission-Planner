@@ -116,14 +116,14 @@ const util = (function() {
                     summaryText += ' descending to ';
                 }
                 summaryText += Math.round(layer.altitudes[i + 1]) + UNIT_MAP[units].altitude + '. ';
-                if (i > 0)
+                summaryText += distance.toFixed(1) + UNIT_MAP[units].distance + ' traveled.';
+                if ((i > 0) && (i < coords.length - 2))
                 {
-                    summaryText += distance.toFixed(1) + UNIT_MAP[units].distance + ' traveled.';
-                    summaryText += '<br />Total Distance: ' + summedDistance.toFixed(1) + UNIT_MAP[units].distance + ', Total Time: ' + this.formatTime(time) + ' minutes</li>';
+                    summaryText += '<br />Distance Flown: ' + summedDistance.toFixed(1) + UNIT_MAP[units].distance + ', Time Elapsed: ' + this.formatTime(summedTime) + ' minutes</li>';
                 }
             }
             var FlightLocation = calc.latLngGrid(coords[coords.length - 1], mapConfig);
-            summaryText += '<li>End flight in grid ' + FlightLocation[0] + '.' + FlightLocation[1] + ' at ' + Math.round(layer.altitudes[coords.length - 1]) + UNIT_MAP[units].altitude + '.</li>';
+            summaryText += '<li>End flight in grid ' + FlightLocation[0] + '.' + FlightLocation[1] + ' at ' + Math.round(layer.altitudes[coords.length - 1]) + UNIT_MAP[units].altitude + '.<br />Total Distance: ' + summedDistance.toFixed(1) + UNIT_MAP[units].distance + ', Total Time: ' + this.formatTime(summedTime) + ' minutes</li>';
             summaryText += '</ol>';
 
             return summaryText;
