@@ -78,6 +78,10 @@ L.Draw.Ruler = L.Draw.Feature.extend({
 		allowIntersection: true,
 		repeatMode: false,
         icon: myIcon,
+		mouseIcon: new L.DivIcon({
+			iconSize: new L.Point(8, 8),
+			className: 'leaflet-div-icon leaflet-editing-icon'
+		}),
         shapeOptions: {
             stroke: true,
             color: BLACK,
@@ -88,7 +92,7 @@ L.Draw.Ruler = L.Draw.Feature.extend({
 		feet: true, // When not metric, to use feet instead of yards for display.
 		nautic: false, // When not metric, not feet use nautic mile for display
 		showLength: true, // Whether to display distance in the tooltip
-		zIndexOffset: 2000, // This should be > than the highest z-index any map layers
+		zIndexOffset: 20000, // This should be > than the highest z-index any map layers
 		factor: 1, // To change distance calculation
 		maxPoints: 0 // Once this number of points are placed, finish shape
     },
@@ -113,6 +117,8 @@ L.Draw.Ruler = L.Draw.Feature.extend({
 		if (this._map) {
 			this._mapDraggable = this._map.dragging.enabled();
 
+			this._container.style.cursor = 'crosshair';
+
 			if (this._mapDraggable) {
 				this._map.dragging.disable();
 			}
@@ -121,8 +127,8 @@ L.Draw.Ruler = L.Draw.Feature.extend({
 
 			this._tooltip.updateContent({text: this._initialLabelText});
 
-			if (!this._mouseMarker) {
-				this._mouseMarker = L.marker(this._map.getCenter(), {
+			if (!this._compassMarker) {
+				this._compassMarker = L.marker(this._map.getCenter(), {
 					icon: myIcon,
 					opacity: 100,
 					zIndexOffset: this.options.zIndexOffset,
@@ -130,7 +136,21 @@ L.Draw.Ruler = L.Draw.Feature.extend({
 				});
 			}
 
-			this._mouseMarker
+			if (!this._blockerMarker) {
+				this._blockerMarker = L.marker(this._map.getCenter(), {
+					icon: L.divIcon({
+						className: 'leaflet-mouse-marker',
+						iconAnchor: [20, 20],
+						iconSize: [40, 40]
+					}),
+					opacity: 0,
+					zIndexOffset: this.options.zIndexOffset + 1
+				});
+			}
+
+            this._compassMarker.addTo(this._map);
+
+			this._blockerMarker
                 .on('mousedown', this._onMouseDown, this)
                 .on('mousemove', this._onMouseMove, this)
                 .on('mouseup', this._onMouseUp, this)
@@ -153,16 +173,21 @@ L.Draw.Ruler = L.Draw.Feature.extend({
             this._map.dragging.enable();
         }
 
+		this._container.style.cursor = '';
+
 		this._map.removeLayer(this._poly);
 		delete this._poly;
 
-		this._mouseMarker
+		this._map.removeLayer(this._compassMarker);
+		delete this._compassMarker;
+
+		this._blockerMarker
             .off('mousedown', this._onMouseDown, this)
             .off('mousemove', this._onMouseMove, this)
             .off('mouseup', this._onMouseUp, this)
             .off('mouseout', this._onMouseOut, this);
-		this._map.removeLayer(this._mouseMarker);
-		delete this._mouseMarker;
+		this._map.removeLayer(this._blockerMarker);
+		delete this._blockerMarker;
 
 		this._map
             .off('mousedown', this._onMouseDown, this)
@@ -179,16 +204,27 @@ L.Draw.Ruler = L.Draw.Feature.extend({
 	},
 
 	_onMouseDown: function (e) {
-		this._clickHandled = true;
-        if (this._startpos === null) {
-            this._startpos = e.latlng;
+        if (this._clickHandled === true) {
+            this._startpos = null;
+            this._map.removeLayer(this._poly);
+            this._compassMarker.setLatLng(e.latlng);
+            this._tooltip.updateContent({text: this._initialLabelText});
+            this._clickHandled = null;
         }
+        else {
+            if (this._startpos === null) {
+                this._startpos = e.latlng;
+            }
+            this._clickHandled = true;
+        }
+        L.DomEvent.stopPropagation(e);
+		L.DomEvent.preventDefault(e);
 	},
 
 	_onMouseMove: function (e) {
+		var newPos = this._map.mouseEventToLayerPoint(e.originalEvent);
+		var latlng = this._map.layerPointToLatLng(newPos);
         if (this._clickHandled === true) {
-            var latlng = e.latlng;
-
             if (this._startpos === null ) {
                 this._startpos = latlng;
             }
@@ -203,22 +239,20 @@ L.Draw.Ruler = L.Draw.Feature.extend({
             var reciprocal = (heading + 180) % 360;
             var distance = parseFloat(calc.convertMetricScale(mapConfig.scale, units) * L.CRS.Simple.distance(this._startpos, latlng));
 
+            this._blockerMarker.setLatLng(latlng);
             this._tooltip.updateContent({text: 'Distance: ' + distance.toFixed(1) + unitText + '<br />Heading: ' + heading.toFixed(1) + '&deg<br />Reciprocal: ' + reciprocal.toFixed(1) + '&deg'});
             this._tooltip.updatePosition(latlng);
             this._drawRuler(this._startpos, latlng);
         }
         else {
-            this._mouseMarker.setLatLng(e.latlng);
-            this._tooltip.updatePosition(e.latlng);
+            this._compassMarker.setLatLng(latlng);
+            this._blockerMarker.setLatLng(latlng);
+            this._tooltip.updatePosition(latlng);
         }
 	},
 
     _onMouseUp: function (e) {
-		this._clickHandled = null;
-        this._startpos = null;
-        this._map.removeLayer(this._poly);
-        this._mouseMarker.setLatLng(e.latlng);
-        this._tooltip.updateContent({text: this._initialLabelText});
+
     }
 });
 
