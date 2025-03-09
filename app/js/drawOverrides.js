@@ -218,7 +218,6 @@ L.Draw.Ruler = L.Draw.Feature.extend({
             this._clickHandled = true;
         }
         L.DomEvent.stopPropagation(e);
-		L.DomEvent.preventDefault(e);
 	},
 
 	_onMouseMove: function (e) {
