@@ -380,7 +380,7 @@ const icons = icons_unmapped(L);
         var turnMarkerContent = util.formatFlightTurnMarker(route.altitudes[0], state.units);
         var turnMarker = L.marker(turnCoords, {
             altitude: route.altitudes[0],
-            draggable: false,
+            draggable: true,
             icon: icons.textIconFactory(turnMarkerContent, ' flight-start-alt ' + getMapTextClasses(state))
         });
         turnMarker.parentId = id;
@@ -414,6 +414,7 @@ const icons = icons_unmapped(L);
                 heading: heading,
                 time: time,
                 speed: route.speeds[i],
+                draggable: true,
                 icon: icons.textIconFactory(markerContent, 'flight-leg nobg ' + getMapTextClasses(state))
             });
             marker.parentId = id;
@@ -428,7 +429,7 @@ const icons = icons_unmapped(L);
             turnMarkerContent = util.formatFlightTurnMarker(route.altitudes[i+1], state.units);
             turnMarker = L.marker(turnCoords, {
                 altitude: route.altitudes[i],
-                draggable: false,
+                draggable: true,
                 icon: icons.textIconFactory(turnMarkerContent, ' flight-turn ' + getMapTextClasses(state))
             });
             turnMarker.parentId = id;
