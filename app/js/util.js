@@ -85,8 +85,8 @@ const util = (function() {
             {
                 var altDiff = calc.altitudeUnitAdjust(Math.abs(layer.altitudes[i] - layer.altitudes[i+1]), units);
                 var FlightLocation = calc.latLngGrid(coords[i], mapConfig);
-                var time = calc.time(Math.round(layer.speeds[i]), parseFloat(mapConfig.scale * L.CRS.Simple.distance(coords[i], coords[i+1])) + parseFloat(altDiff));
-                var distance = parseFloat(mapConfig.scale * L.CRS.Simple.distance(coords[i], coords[i+1]));
+                var time = calc.time(layer.speeds[i], parseFloat(calc.convertMetricScale(mapConfig.scale, units) * L.CRS.Simple.distance(coords[i], coords[i+1])) + parseFloat(altDiff));
+                var distance = calc.convertMetricScale(mapConfig.scale, units) * L.CRS.Simple.distance(coords[i], coords[i+1]);
                 summedTime += time;
                 summedDistance += distance;
 
@@ -131,8 +131,8 @@ const util = (function() {
         
         formatFlightSummaryTable: function(layer, mapConfig, units) {
             var summaryText = '<h3>' + layer.name + '</h3><ol class="summary">';
-            summaryText += '<table><tr><th>Flight Name</th><th>Flight Leg</th><th>Grid</th><th>Keypad</th><th>Heading</th>';
-            summaryText += '<th>Distance (' + UNIT_MAP[units].distance + ')</th><th>Speed (' + UNIT_MAP[units].speed + ')</th><th>Altitude (' + UNIT_MAP[units].altitude + ')</th></tr>';
+            summaryText += '<table><tr><th>Flight Leg</th><th>Grid</th><th>Keypad</th><th>Heading</th>';
+            summaryText += '<th>Distance (' + UNIT_MAP[units].distance + ')</th><th>Speed (' + UNIT_MAP[units].speed + ')</th><th>Altitude (' + UNIT_MAP[units].altitude + ')</th><th>Time (MM:SS)</th></tr>';
             var summedTime = 0;
             var summedDistance = 0;
             var coords = layer.getLatLngs();
@@ -140,33 +140,39 @@ const util = (function() {
             {
                 var altDiff = calc.altitudeUnitAdjust(Math.abs(layer.altitudes[i] - layer.altitudes[i+1]), units);
                 var FlightLocation = calc.latLngGrid(coords[i], mapConfig);
-                var time = calc.time(Math.round(layer.speeds[i]), parseFloat(mapConfig.scale * L.CRS.Simple.distance(coords[i], coords[i+1])) + parseFloat(altDiff));
-                var distance = parseFloat(mapConfig.scale * L.CRS.Simple.distance(coords[i], coords[i+1]));
+                var time = calc.time(layer.speeds[i], parseFloat(calc.convertMetricScale(mapConfig.scale, units) * L.CRS.Simple.distance(coords[i], coords[i+1])) + parseFloat(altDiff));
+                var distance = calc.convertMetricScale(mapConfig.scale,units) * L.CRS.Simple.distance(coords[i], coords[i+1]);
                 summedTime += time;
                 summedDistance += distance;
 
                 summaryText += '<tr>';
-                summaryText += '<td>' + layer.name + '</td>';
                 summaryText += '<td>' + (i + 1) + '</td>';
                 summaryText += '<td>' + FlightLocation[0] + '</td>';
                 summaryText += '<td>' + FlightLocation[1] + '</td>';
                 summaryText += '<td>' + calc.pad(Math.round(calc.heading(coords[i], coords[i+1])), 3) + '</td>';
                 summaryText += '<td>' + distance.toFixed(1) + '</td>';
                 summaryText += '<td>' + Math.round(layer.speeds[i]) + '</td>';
-                summaryText += '<td>' + Math.round(layer.altitudes[i]) + '</td>';
+                if (layer.altitudes[i] == layer.altitudes[i+1]) {
+                    summaryText += '<td>' + Math.round(layer.altitudes[i]) + '</td>';
+                }
+                else {
+                    summaryText += '<td>' + Math.round(layer.altitudes[i]) + '->' + Math.round(layer.altitudes[i]) + '</td>';
+                }
+
+                summaryText += '<td>' + util.formatTime(time) + '</td>';
                 summaryText += '</tr>';
             }
 
             var FlightLocation = calc.latLngGrid(coords[i], mapConfig);
             summaryText += '<tr>';
-            summaryText += '<td>' + layer.name + '</td>';
-            summaryText += '<td></td>';
+            summaryText += '<td>END</td>';
             summaryText += '<td>' + FlightLocation[0] + '</td>';
             summaryText += '<td>' + FlightLocation[1] + '</td>';
             summaryText += '<td></td>';
             summaryText += '<td></td>';
             summaryText += '<td></td>';
             summaryText += '<td>' + Math.round(layer.altitudes[i]) + '</td>';
+            summaryText += '<td></td>';
             summaryText += '</tr>';
 
             summaryText += '</table></ol>';
