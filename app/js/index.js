@@ -1574,7 +1574,9 @@ const icons = icons_unmapped(L);
                                     summaryPrint.document.write(summaryText);
                                     summaryPrint.document.write('</body></html>');
                                     summaryPrint.document.close();
-                                    summaryPrint.print();
+                                    summaryPrint.setTimeout(() => {
+                                        summaryPrint.print();
+                                    }, "1000");
                                 });
                             }
                         });
