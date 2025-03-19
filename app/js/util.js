@@ -156,7 +156,7 @@ const util = (function() {
                     summaryText += '<td>' + Math.round(layer.altitudes[i]) + '</td>';
                 }
                 else {
-                    summaryText += '<td>' + Math.round(layer.altitudes[i]) + '->' + Math.round(layer.altitudes[i]) + '</td>';
+                    summaryText += '<td>' + Math.round(layer.altitudes[i]) + '->' + Math.round(layer.altitudes[i+1]) + '</td>';
                 }
 
                 summaryText += '<td>' + util.formatTime(time) + '</td>';
