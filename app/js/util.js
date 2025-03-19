@@ -85,7 +85,7 @@ const util = (function() {
             {
                 var altDiff = calc.altitudeUnitAdjust(Math.abs(layer.altitudes[i] - layer.altitudes[i+1]), units);
                 var FlightLocation = calc.latLngGrid(coords[i], mapConfig);
-                var time = calc.time(layer.speeds[i], parseFloat(calc.convertMetricScale(mapConfig.scale, units) * L.CRS.Simple.distance(coords[i], coords[i+1])) + parseFloat(altDiff));
+                var time = calc.time(layer.speeds[i], Math.hypot(parseFloat(calc.convertMetricScale(mapConfig.scale, units) * L.CRS.Simple.distance(coords[i], coords[i+1])), parseFloat(altDiff)));
                 var distance = calc.convertMetricScale(mapConfig.scale, units) * L.CRS.Simple.distance(coords[i], coords[i+1]);
                 summedTime += time;
                 summedDistance += distance;
@@ -140,7 +140,7 @@ const util = (function() {
             {
                 var altDiff = calc.altitudeUnitAdjust(Math.abs(layer.altitudes[i] - layer.altitudes[i+1]), units);
                 var FlightLocation = calc.latLngGrid(coords[i], mapConfig);
-                var time = calc.time(layer.speeds[i], parseFloat(calc.convertMetricScale(mapConfig.scale, units) * L.CRS.Simple.distance(coords[i], coords[i+1])) + parseFloat(altDiff));
+                var time = calc.time(layer.speeds[i], Math.hypot(parseFloat(calc.convertMetricScale(mapConfig.scale, units) * L.CRS.Simple.distance(coords[i], coords[i+1])), parseFloat(altDiff)));
                 var distance = calc.convertMetricScale(mapConfig.scale,units) * L.CRS.Simple.distance(coords[i], coords[i+1]);
                 summedTime += time;
                 summedDistance += distance;

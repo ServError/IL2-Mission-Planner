@@ -2,7 +2,9 @@
     <div class="row">
         <h2><span class='fa fa-plane modal-icon'></span> Configure Flight / Line</h2>
     </div>
-    <form onsubmit="return false;">
+    <div id="flight-plan-error" class="row error-message hidden-section">
+    </div>
+    <form id="flight-plan-form" onsubmit="return false;">
         <div class="row">
             <label for="flight-color">Color</label>
             <select class="eleven columns" id="flight-color">

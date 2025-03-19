@@ -231,40 +231,43 @@ const icons = icons_unmapped(L);
                 element.focus();
                 element.select();
                 L.DomEvent.on(e.modal._container.querySelector('.modal-ok'), 'click', function() {
-                    if (V.validate('flight-turn-form')) {
-                        var newAltitude = parseInt(element.value);
-                        parentRoute.altitudes[marker.index] = newAltitude;
-                        marker.options.altitude = newAltitude;
-                        if (marker.priorMarkerId !== 0)
-                        {
-                            var altDiff = calc.altitudeUnitAdjust(Math.abs(parentRoute.altitudes[marker.index] - parentRoute.altitudes[marker.index-1]), state.units);
-                            //var gndDistance = calc.convertMetricScale(mapConfig.scale, state.units) * L.CRS.Simple.distance(coords[marker.index], coords[marker.index-1]);
-                            //var airDistance = parseFloat(altDiff) + parseFloat(gndDistance);
+                    V.validate('#flight-turn-form').then((validationResult) => {
+                        if (validationResult.valid) {
+                            var newAltitude = parseInt(element.value);
+                            parentRoute.altitudes[marker.index] = newAltitude;
+                            marker.options.altitude = newAltitude;
+                            if (marker.priorMarkerId !== 0)
+                            {
+                                var altDiff = calc.altitudeUnitAdjust(Math.abs(parentRoute.altitudes[marker.index] - parentRoute.altitudes[marker.index-1]), state.units);
+                                //var gndDistance = calc.convertMetricScale(mapConfig.scale, state.units) * L.CRS.Simple.distance(coords[marker.index], coords[marker.index-1]);
+                                //var airDistance = Math.hypot(parseFloat(altDiff), parseFloat(gndDistance));
 
-                            var priorMarker = drawnMarkers.getLayer(marker.priorMarkerId);
-                            priorMarker.options.altDiff = altDiff;
-                            applyCustomFlightLegCallback(priorMarker);
-                        }
-                        if (marker.followingMarkerId !== 0)
-                        {
-                            altDiff = calc.altitudeUnitAdjust(Math.abs(parentRoute.altitudes[marker.index] - parentRoute.altitudes[marker.index+1]), state.units);
-                            //gndDistance = calc.convertMetricScale(mapConfig.scale, state.units) * L.CRS.Simple.distance(coords[marker.index], coords[marker.index-1]);
-                            //airDistance = parseFloat(altDiff) + parseFloat(gndDistance);
+                                var priorMarker = drawnMarkers.getLayer(marker.priorMarkerId);
+                                priorMarker.options.altDiff = altDiff;
+                                applyCustomFlightLegCallback(priorMarker);
+                            }
+                            if (marker.followingMarkerId !== 0)
+                            {
+                                altDiff = calc.altitudeUnitAdjust(Math.abs(parentRoute.altitudes[marker.index] - parentRoute.altitudes[marker.index+1]), state.units);
+                                //gndDistance = calc.convertMetricScale(mapConfig.scale, state.units) * L.CRS.Simple.distance(coords[marker.index], coords[marker.index-1]);
+                                //airDistance = Math.hypot(parseFloat(altDiff), parseFloat(gndDistance));
 
-                            var followingMarker = drawnMarkers.getLayer(marker.followingMarkerId);
-                            followingMarker.options.altDiff = altDiff;
-                            applyCustomFlightLegCallback(followingMarker);
+                                var followingMarker = drawnMarkers.getLayer(marker.followingMarkerId);
+                                followingMarker.options.altDiff = altDiff;
+                                applyCustomFlightLegCallback(followingMarker);
+                            }
+                            
+                            applyCustomFlightTurnCallback(marker);
+                            e.modal.hide();
                         }
-                        
-                        applyCustomFlightTurnCallback(marker);
-                        e.modal.hide();
-                    } else {
-                        var errorElement = document.getElementById('flight-turn-error');
-                        var units = state.units === 'metric' ? 'meters' : 'feet';
-                        errorElement.innerHTML = 'Please input a valid altitude in' + units + '.';
-                        util.removeClass(errorElement, 'hidden-section');
-                        errorElement.focus();
-                    }
+                        else {
+                            var errorElement = document.getElementById('flight-turn-error');
+                            var units = state.units === 'metric' ? 'meters' : 'feet';
+                            errorElement.innerHTML = 'Please input a valid altitude in ' + units + '.';
+                            util.removeClass(errorElement, 'hidden-section');
+                            errorElement.focus();
+                        }
+                    });
                 });
                 L.DomEvent.on(e.modal._container.querySelector('.modal-cancel'), 'click', function() {
                     e.modal.hide();
@@ -298,19 +301,21 @@ const icons = icons_unmapped(L);
                 element.focus();
                 element.select();
                 L.DomEvent.on(e.modal._container.querySelector('.modal-ok'), 'click', function() {
-                    if (V.validate('flight-leg-form')) {
-                        var newSpeed = parseInt(element.value);
-                        parentRoute.speeds[marker.index] = newSpeed;
-                        marker.options.speed = newSpeed;
-                        applyCustomFlightLegCallback(marker);
-                        e.modal.hide();
-                    } else {
-                        var errorElement = document.getElementById('flight-leg-error');
-                        var units = state.units === 'metric' ? 'kilometers' : 'miles';
-                        errorElement.innerHTML = 'Please input a valid speed in' + units + 'per hour.';
-                        util.removeClass(errorElement, 'hidden-section');
-                        errorElement.focus();
-                    }
+                    V.validate('#flight-leg-form').then((validationResult) => {
+                        if (validationResult.valid) {
+                            var newSpeed = parseInt(element.value);
+                            parentRoute.speeds[marker.index] = newSpeed;
+                            marker.options.speed = newSpeed;
+                            applyCustomFlightLegCallback(marker);
+                            e.modal.hide();
+                        } else {
+                            var errorElement = document.getElementById('flight-leg-error');
+                            var units = state.units === 'metric' ? 'kilometers' : 'miles';
+                            errorElement.innerHTML = 'Please input a valid speed in ' + units + ' per hour.';
+                            util.removeClass(errorElement, 'hidden-section');
+                            errorElement.focus();
+                        }
+                    });
                 });
                 L.DomEvent.on(e.modal._container.querySelector('.modal-cancel'), 'click', function() {
                     e.modal.hide();
@@ -320,7 +325,7 @@ const icons = icons_unmapped(L);
     }
 
     function applyCustomFlightLegCallback(marker) {
-        marker.options.time = util.formatTime(calc.time(marker.options.speed, parseFloat(marker.options.gndDistance) + parseFloat(marker.options.altDiff)));
+        marker.options.time = util.formatTime(calc.time(marker.options.speed, Math.hypot(parseFloat(marker.options.gndDistance), parseFloat(marker.options.altDiff))));
         var newContent = util.formatFlightLegMarker(
                 marker.options.gndDistance, 
                 marker.options.heading, 
@@ -404,7 +409,7 @@ const icons = icons_unmapped(L);
         for (var i = 0; i < coords.length-1; i++) {
             var altDiff = calc.altitudeUnitAdjust(Math.abs(route.altitudes[i] - route.altitudes[i+1]), state.units);
             var gndDistance = calc.convertMetricScale(mapConfig.scale, state.units) * L.CRS.Simple.distance(coords[i], coords[i+1]);
-            var airDistance = parseFloat(altDiff) + parseFloat(gndDistance);
+            var airDistance = Math.hypot(parseFloat(gndDistance), parseFloat(altDiff));
             var heading = calc.heading(coords[i], coords[i+1]);
             var midpoint = calc.midpoint(coords[i], coords[i+1]);
             var time = util.formatTime(calc.time(route.speeds[i], airDistance));
@@ -527,8 +532,17 @@ const icons = icons_unmapped(L);
                 element.focus();
                 element.select();
                 L.DomEvent.on(e.modal._container.querySelector('.modal-ok'), 'click', function() {
-                    clickedOk = true;
-                    e.modal.hide();
+                    V.validate('#flight-plan-form').then((validationResult) => {
+                        if (validationResult.valid) {
+                            clickedOk = true;
+                            e.modal.hide();
+                        } else {
+                            var errorElement = document.getElementById('flight-plan-error');
+                            errorElement.innerHTML = 'Please input a valid alphanumeric plan name, speed, and altitude.';
+                            util.removeClass(errorElement, 'hidden-section');
+                            errorElement.focus();
+                        }
+                    });
                 });
                 L.DomEvent.on(e.modal._container.querySelector('.modal-cancel'), 'click', function() {
                     e.modal.hide();
@@ -900,7 +914,7 @@ const icons = icons_unmapped(L);
                         FlightLegDistance = parseFloat(calc.convertMetricScale(mapConfig.scale, state.units) * L.CRS.Simple.distance(coords[i], coords[i+1])).toFixed(1);
                         FlightLegSpeed = Math.round(layer.speeds[i]);
                         FlightLegAltitude = Math.round(layer.altitudes[i]);
-                        FlightLegTime = util.formatTime(calc.time(Math.round(layer.speeds[i]), parseFloat(mapConfig.scale * L.CRS.Simple.distance(coords[i], coords[i+1])) + parseFloat(altDiff)));
+                        FlightLegTime = util.formatTime(calc.time(Math.round(layer.speeds[i]), Math.hypot(parseFloat(mapConfig.scale * L.CRS.Simple.distance(coords[i], coords[i+1])), parseFloat(altDiff))));
                         csvData.push({FlightName, FlightLeg, FlightGrid, FlightKeypad, FlightHeading, FlightLegDistance, FlightLegSpeed, FlightLegAltitude, FlightLegTime});
                     }
                     FlightLocation = calc.latLngGrid(coords[coords.length - 1], mapConfig);
@@ -1814,17 +1828,19 @@ const icons = icons_unmapped(L);
                             var gridElement = document.getElementById('grid-input');
                             gridElement.focus();
                             L.DomEvent.on(e.modal._container.querySelector('.modal-ok'), 'click', function() {
-                                if (V.validate('grid-jump-form')) {
-                                    var grid = gridElement.value;
-                                    var viewLatLng = calc.gridLatLng(grid, mapConfig);
-                                    map.flyTo(viewLatLng, mapConfig.gridHopZoom);
-                                    e.modal.hide();
-                                } else {
-                                    var errorElement = document.getElementById('grid-jump-error');
-                                    errorElement.innerHTML = 'Please input a valid four digit grid number.';
-                                    util.removeClass(errorElement, 'hidden-section');
-                                    errorElement.focus();
-                                }
+                                V.validate('#grid-jump-form').then((validationResult) => {
+                                    if (validationResult.valid) {
+                                        var grid = gridElement.value;
+                                        var viewLatLng = calc.gridLatLng(grid, mapConfig);
+                                        map.flyTo(viewLatLng, mapConfig.gridHopZoom);
+                                        e.modal.hide();
+                                    } else {
+                                        var errorElement = document.getElementById('grid-jump-error');
+                                        errorElement.innerHTML = 'Please input a valid four digit grid number.';
+                                        util.removeClass(errorElement, 'hidden-section');
+                                        errorElement.focus();
+                                    }
+                                });
                             });
                             L.DomEvent.on(e.modal._container.querySelector('.modal-cancel'), 'click', function() {
                                 e.modal.hide();

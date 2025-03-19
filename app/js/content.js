@@ -263,15 +263,23 @@ const content = (function() {
     };
 
     var validatinatorConfig = {
-        'grid-jump-form': {
-            'grid-input': 'digitsLength:4'
+        '#grid-jump-form': {
+            '#grid-input': 'digitsLength:4'
         },
-        'flight-leg-form': {
-            'flight-leg-speed': 'between:0,9999'
+        '#flight-plan-form': {
+            '#flight-name': 'minLength:1|maxLength:50',
+            '#flight-speed': 'between:0,9999',
+            '#flight-altitude': 'between:0,999999'
         },
-        'connect-form': {
-            'stream-password': 'required',
-            'stream-code': 'requiredIf:leader-checkbox:checked'
+        '#flight-leg-form': {
+            '#flight-leg-speed': 'between:0,9999'
+        },
+        '#flight-turn-form': {
+            '#flight-turn-altitude': 'between:0,999999'
+        },
+        '#connect-form': {
+            '#stream-password': 'required',
+            '#stream-code': 'requiredIf:leader-checkbox:checked'
         }
     };
 
