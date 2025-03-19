@@ -1,10 +1,9 @@
+import 'skeleton-css/css/normalize.css';
+import 'skeleton-css/css/skeleton.css';
 import 'font-awesome/css/font-awesome.min.css';
 import 'leaflet/dist/leaflet.css';
 import 'leaflet-draw/dist/leaflet.draw.css';
 import 'leaflet-modal/dist/leaflet.modal.min.css';
-import 'skeleton-css/css/normalize.css';
-import 'skeleton-css/css/skeleton.css';
-import '../css/index.css';
 
 import L from "leaflet";
 import 'leaflet-draw';
@@ -20,6 +19,8 @@ import webdis from "./webdis.js";
 import "./controls.js";
 import conf from '../../dist/conf.json' with { type: "json" };
 import icons_unmapped from "./icons.js"; //(L)?
+
+import '../css/index.css';
 
 const icons = icons_unmapped(L);
 
@@ -869,6 +870,8 @@ const icons = icons_unmapped(L);
     function exportMapToCSV() {
         var csvData = [];
 
+        var FlightLocation;
+        var altDiff;
         var FlightName = 'Flight Name';
         var FlightLeg = 'Flight Leg';
         var FlightGrid = 'Grid';
@@ -877,7 +880,8 @@ const icons = icons_unmapped(L);
         var FlightLegDistance = (state.units === 'imperial') ? 'Distance (mi)' : 'Distance (km)';
         var FlightLegSpeed = (state.units === 'imperial') ? 'Speed (mph)' : 'Speed (kph)';
         var FlightLegAltitude = (state.units === 'imperial') ? 'Altitude (ft)' : 'Altitude (m)';
-        csvData.push({FlightName, FlightLeg, FlightGrid, FlightKeypad, FlightHeading, FlightLegDistance, FlightLegSpeed, FlightLegAltitude});
+        var FlightLegTime = 'Time (MM:SS)';
+        csvData.push({FlightName, FlightLeg, FlightGrid, FlightKeypad, FlightHeading, FlightLegDistance, FlightLegSpeed, FlightLegAltitude, FlightLegTime});
 
         drawnItems.eachLayer(function(layer) {
             if ((layer instanceof L.Polyline) && !(layer instanceof L.Polygon)) {
@@ -885,29 +889,32 @@ const icons = icons_unmapped(L);
                     var coords = layer.getLatLngs();
                     for (var i = 0; i < (coords.length - 1); i++)
                     {
-                        var FlightLocation = calc.latLngGrid(coords[i], mapConfig);
+                        FlightLocation = calc.latLngGrid(coords[i], mapConfig);
+                        altDiff = calc.altitudeUnitAdjust(Math.abs(layer.altitudes[i] - layer.altitudes[i+1]), state.units);
 
-                        var FlightName = layer.name;
-                        var FlightLeg = (i + 1);
-                        var FlightGrid = FlightLocation[0];
-                        var FlightKeypad = FlightLocation[1];
-                        var FlightHeading = Math.round(calc.heading(coords[i], coords[i+1]));
-                        var FlightLegDistance = parseFloat(calc.convertMetricScale(mapConfig.scale, state.units) * L.CRS.Simple.distance(coords[i], coords[i+1])).toFixed(1);
-                        var FlightLegSpeed = Math.round(layer.speeds[i]);
-                        var FlightLegAltitude = Math.round(layer.altitudes[i]);
-                        csvData.push({FlightName, FlightLeg, FlightGrid, FlightKeypad, FlightHeading, FlightLegDistance, FlightLegSpeed, FlightLegAltitude});
+                        FlightName = layer.name;
+                        FlightLeg = (i + 1);
+                        FlightGrid = FlightLocation[0];
+                        FlightKeypad = FlightLocation[1];
+                        FlightHeading = Math.round(calc.heading(coords[i], coords[i+1]));
+                        FlightLegDistance = parseFloat(calc.convertMetricScale(mapConfig.scale, state.units) * L.CRS.Simple.distance(coords[i], coords[i+1])).toFixed(1);
+                        FlightLegSpeed = Math.round(layer.speeds[i]);
+                        FlightLegAltitude = Math.round(layer.altitudes[i]);
+                        FlightLegTime = util.formatTime(calc.time(Math.round(layer.speeds[i]), parseFloat(mapConfig.scale * L.CRS.Simple.distance(coords[i], coords[i+1])) + parseFloat(altDiff)));
+                        csvData.push({FlightName, FlightLeg, FlightGrid, FlightKeypad, FlightHeading, FlightLegDistance, FlightLegSpeed, FlightLegAltitude, FlightLegTime});
                     }
-                    var FlightLocation = calc.latLngGrid(coords[coords.length - 1], mapConfig);
+                    FlightLocation = calc.latLngGrid(coords[coords.length - 1], mapConfig);
 
-                    var FlightName = layer.name;
-                    var FlightLeg = 'end';
-                    var FlightGrid = FlightLocation[0];
-                    var FlightKeypad = FlightLocation[1];
-                    var FlightHeading = '';
-                    var FlightLegDistance = '';
-                    var FlightLegSpeed = '';
-                    var FlightLegAltitude = Math.round(layer.altitudes[coords.length - 1]);
-                    csvData.push({FlightName, FlightLeg, FlightGrid, FlightKeypad, FlightHeading, FlightLegDistance, FlightLegSpeed, FlightLegAltitude});
+                    FlightName = layer.name;
+                    FlightLeg = 'end';
+                    FlightGrid = FlightLocation[0];
+                    FlightKeypad = FlightLocation[1];
+                    FlightHeading = '';
+                    FlightLegDistance = '';
+                    FlightLegSpeed = '';
+                    FlightLegAltitude = Math.round(layer.altitudes[coords.length - 1]);
+                    FlightLegTime = '';
+                    csvData.push({FlightName, FlightLeg, FlightGrid, FlightKeypad, FlightHeading, FlightLegDistance, FlightLegSpeed, FlightLegAltitude, FlightLegTime});
                 }
             }
         });
@@ -1533,10 +1540,37 @@ const icons = icons_unmapped(L);
                                 L.DomEvent.on(e.modal._container.querySelector('.modal-ok'), 'click', function() {
                                     e.modal.hide();
                                 });
+                                L.DomEvent.on(e.modal._container.querySelector('.modal-table'), 'click', function() {
+                                    summaryText = '';
+                                    drawnItems.eachLayer(function(layer) {
+                                        if ((layer instanceof L.Polyline) && !(layer instanceof L.Polygon)) {
+                                            if (layer.isFlightPlan)
+                                            {
+                                                summaryText += util.formatFlightSummaryTable(layer, mapConfig, state.units);
+                                            }
+                                        }
+                                    });
+                                    text.innerHTML = summaryText;
+                                    e.modal.update();
+                                });
+                                L.DomEvent.on(e.modal._container.querySelector('.modal-textual'), 'click', function() {
+                                    summaryText = '';
+                                    drawnItems.eachLayer(function(layer) {
+                                        if ((layer instanceof L.Polyline) && !(layer instanceof L.Polygon)) {
+                                            if (layer.isFlightPlan)
+                                            {
+                                                summaryText += util.formatFlightSummary(layer, mapConfig, state.units);
+                                            }
+                                        }
+                                    });
+                                    text.innerHTML = summaryText;
+                                    e.modal.update();
+                                });
                                 L.DomEvent.on(e.modal._container.querySelector('.modal-print'), 'click', function() {
                                     var summaryPrint = window.open('', '', 'height=700, width=700');
                                     summaryPrint.document.write('<html>');
                                     summaryPrint.document.write('<body >');
+                                    summaryPrint.document.write('<link rel="stylesheet" href="index.css" type="text/css"></link>');
                                     summaryPrint.document.write(summaryText);
                                     summaryPrint.document.write('</body></html>');
                                     summaryPrint.document.close();

@@ -241,3 +241,13 @@ img.modal-image {
         max-width: 260px;
     }
 }
+
+table, th, td {
+    border: 1px solid black;
+    border-style: double;
+    border-collapse: inherit;
+}
+
+th, td {
+    text-align: center;
+}
