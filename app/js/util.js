@@ -109,11 +109,11 @@ const util = (function() {
                 }
                 else if (layer.altitudes[i] < layer.altitudes[i + 1])
                 {
-                    summaryText += ' climbing to ';
+                    summaryText += ' climbing from ' + layer.altitudes[i] + UNIT_MAP[units].altitude + ' to ';
                 }
                 else
                 {
-                    summaryText += ' descending to ';
+                    summaryText += ' descending from ' + layer.altitudes[i] + UNIT_MAP[units].altitude + ' to ';
                 }
                 summaryText += Math.round(layer.altitudes[i + 1]) + UNIT_MAP[units].altitude + '. ';
                 summaryText += distance.toFixed(1) + UNIT_MAP[units].distance + ' traveled.';

@@ -1553,7 +1553,7 @@ const icons = icons_unmapped(L);
                                     text.innerHTML = summaryText;
                                     e.modal.update();
                                 });
-                                L.DomEvent.on(e.modal._container.querySelector('.modal-textual'), 'click', function() {
+                                L.DomEvent.on(e.modal._container.querySelector('.modal-text'), 'click', function() {
                                     summaryText = '';
                                     drawnItems.eachLayer(function(layer) {
                                         if ((layer instanceof L.Polyline) && !(layer instanceof L.Polygon)) {
