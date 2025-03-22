@@ -538,7 +538,7 @@ const icons = icons_unmapped(L);
                             e.modal.hide();
                         } else {
                             var errorElement = document.getElementById('flight-plan-error');
-                            errorElement.innerHTML = 'Please input a valid alphanumeric plan name, speed, and altitude.';
+                            errorElement.innerHTML = 'Please input a valid plan name, speed, and altitude.';
                             util.removeClass(errorElement, 'hidden-section');
                             errorElement.focus();
                         }
