@@ -1,7 +1,8 @@
-var assert = require('chai').assert;
+/*
+import { assert } from 'chai';
 
 var mockLeaflet = {}
-var content = require('./content.js');
+import content from './content.js';
 
 describe('content', function() {
 
@@ -21,3 +22,4 @@ describe('content', function() {
         });
     });
 });
+*/

@@ -1,5 +1,5 @@
-module.exports = (function() {
-
+const calc = (function() {
+    
     const
         SECONDS_IN_HOUR = 3600,
         BORDER = 40,
@@ -30,7 +30,7 @@ module.exports = (function() {
         midpoint: function(a, b) {
             var lat = (a.lat + b.lat) / 2;
             var lng = (a.lng + b.lng) / 2;
-            return L.latLng(lat, lng);
+            return [lat, lng];
         },
 
         pad: function(num, size) {
@@ -131,3 +131,5 @@ module.exports = (function() {
         },
     };
 })();
+
+export default calc;

@@ -39,3 +39,41 @@
     content: "\f12d"; /* fa-eraser */
     font-family: FontAwesome;
 }
+
+.leaflet-draw-draw-ruler:before {
+    content: "\f07e"; /* fa-arrows-h */
+    font-family: FontAwesome;
+}
+
+.leaflet-draw-toolbar .leaflet-draw-draw-ruler {
+	background-position: -152px -2px;
+}
+
+.leaflet-touch .leaflet-draw-toolbar .leaflet-draw-draw-ruler {
+	background-position: -150px -1px;
+}
+
+.leaflet-container {
+    font-size: 1.20rem;
+}
+
+.leaflet-modal .modal-content {
+    padding: 15px;
+    background: #ffffff;
+    -webkit-box-shadow: 0 3px 9px rgba(0,0,0,.5);
+    box-shadow: 0 3px 9px rgba(0,0,0,.5);
+    -webkit-background-clip: padding-box;
+    background-clip: padding-box;
+    border: 1px solid #999;
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    border-radius: 4px;
+    outline: 0;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 100%;
+    margin-bottom: 40px;
+    max-width: 1080px;
+    -webkit-transition: margin 0.3s linear;
+    -o-transition: margin 0.3s linear;
+    transition: margin 0.3s linear;
+}

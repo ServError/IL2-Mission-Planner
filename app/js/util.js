@@ -1,6 +1,9 @@
-module.exports = (function() {
+import url from "url";
+import calc from "./calc.js";
+import pkg from 'file-saver';
+const { saveAs } = pkg;
 
-    var calc = require('./calc.js');
+const util = (function() {
 
     const UNIT_MAP = {
         metric: {
@@ -55,10 +58,10 @@ module.exports = (function() {
             heading = typeof heading === 'number' ? heading.toFixed(0) : heading;
             var textRotation = (heading % 180) - 90;
             return  '<div style="background: rgba(100, 100, 100, .75); transform: rotate(' + textRotation + 'deg);">' + 
-                distance + UNIT_MAP[units].distance + ' | ' + 
+                speed + UNIT_MAP[units].speed + ' | ' + 
                 calc.pad(heading, 3) + '&deg;/' + 
                 calc.pad(calc.invertHeading(heading), 3) +'&deg; <br/> ' + 
-                speed + UNIT_MAP[units].speed + ' | ' + 
+                distance + UNIT_MAP[units].distance + ' | ' + 
                 'ETE ' + time + '</div>';
         },
 
@@ -75,11 +78,17 @@ module.exports = (function() {
         
         formatFlightSummary: function(layer, mapConfig, units) {
             var summaryText = '<h3>' + layer.name + '</h3><ol class="summary">';
+            var summedTime = 0;
+            var summedDistance = 0;
             var coords = layer.getLatLngs();
             for (var i = 0; i < (coords.length - 1); i++)
             {
                 var altDiff = calc.altitudeUnitAdjust(Math.abs(layer.altitudes[i] - layer.altitudes[i+1]), units);
                 var FlightLocation = calc.latLngGrid(coords[i], mapConfig);
+                var time = calc.time(layer.speeds[i], Math.hypot(parseFloat(calc.convertMetricScale(mapConfig.scale, units) * L.CRS.Simple.distance(coords[i], coords[i+1])), parseFloat(altDiff)));
+                var distance = calc.convertMetricScale(mapConfig.scale, units) * L.CRS.Simple.distance(coords[i], coords[i+1]);
+                summedTime += time;
+                summedDistance += distance;
 
                 if (i === 0)
                 {
@@ -92,7 +101,7 @@ module.exports = (function() {
                 summaryText += FlightLocation[0] + '.' + FlightLocation[1];
                 summaryText += ', fly heading ' + calc.pad(Math.round(calc.heading(coords[i], coords[i+1])), 3);
                 summaryText += ' at ' + Math.round(layer.speeds[i]) + ' ' + UNIT_MAP[units].speed;
-                summaryText += ' for ' + this.formatTime(calc.time(Math.round(layer.speeds[i]), parseFloat(mapConfig.scale * L.CRS.Simple.distance(coords[i], coords[i+1])) + parseFloat(altDiff))) + ' minutes while';
+                summaryText += ' for ' + this.formatTime(time) + ' minutes while';
 
                 if (layer.altitudes[i] === layer.altitudes[i + 1])
                 {
@@ -100,18 +109,73 @@ module.exports = (function() {
                 }
                 else if (layer.altitudes[i] < layer.altitudes[i + 1])
                 {
-                    summaryText += ' climbing to ';
+                    summaryText += ' climbing from ' + layer.altitudes[i] + UNIT_MAP[units].altitude + ' to ';
                 }
                 else
                 {
-                    summaryText += ' descending to ';
+                    summaryText += ' descending from ' + layer.altitudes[i] + UNIT_MAP[units].altitude + ' to ';
                 }
                 summaryText += Math.round(layer.altitudes[i + 1]) + UNIT_MAP[units].altitude + '. ';
-                summaryText += parseFloat(mapConfig.scale * L.CRS.Simple.distance(coords[i], coords[i+1])).toFixed(1) + UNIT_MAP[units].distance + ' traveled.</li>';
+                summaryText += distance.toFixed(1) + UNIT_MAP[units].distance + ' traveled.';
+                if ((i > 0) && (i < coords.length - 2))
+                {
+                    summaryText += '<br />Distance Flown: ' + summedDistance.toFixed(1) + UNIT_MAP[units].distance + ', Time Elapsed: ' + this.formatTime(summedTime) + ' minutes</li>';
+                }
             }
             var FlightLocation = calc.latLngGrid(coords[coords.length - 1], mapConfig);
-            summaryText += '<li>End flight in grid ' + FlightLocation[0] + '.' + FlightLocation[1] + ' at ' + Math.round(layer.altitudes[coords.length - 1]) + UNIT_MAP[units].altitude + '.</li>';
+            summaryText += '<li>End flight in grid ' + FlightLocation[0] + '.' + FlightLocation[1] + ' at ' + Math.round(layer.altitudes[coords.length - 1]) + UNIT_MAP[units].altitude + '.<br />Total Distance: ' + summedDistance.toFixed(1) + UNIT_MAP[units].distance + ', Total Time: ' + this.formatTime(summedTime) + ' minutes</li>';
             summaryText += '</ol>';
+
+            return summaryText;
+        },
+        
+        formatFlightSummaryTable: function(layer, mapConfig, units) {
+            var summaryText = '<h3>' + layer.name + '</h3><ol class="summary">';
+            summaryText += '<table><tr><th>Flight Leg</th><th>Grid</th><th>Keypad</th><th>Heading</th>';
+            summaryText += '<th>Distance (' + UNIT_MAP[units].distance + ')</th><th>Speed (' + UNIT_MAP[units].speed + ')</th><th>Altitude (' + UNIT_MAP[units].altitude + ')</th><th>Time (MM:SS)</th></tr>';
+            var summedTime = 0;
+            var summedDistance = 0;
+            var coords = layer.getLatLngs();
+            for (var i = 0; i < (coords.length - 1); i++)
+            {
+                var altDiff = calc.altitudeUnitAdjust(Math.abs(layer.altitudes[i] - layer.altitudes[i+1]), units);
+                var FlightLocation = calc.latLngGrid(coords[i], mapConfig);
+                var time = calc.time(layer.speeds[i], Math.hypot(parseFloat(calc.convertMetricScale(mapConfig.scale, units) * L.CRS.Simple.distance(coords[i], coords[i+1])), parseFloat(altDiff)));
+                var distance = calc.convertMetricScale(mapConfig.scale,units) * L.CRS.Simple.distance(coords[i], coords[i+1]);
+                summedTime += time;
+                summedDistance += distance;
+
+                summaryText += '<tr>';
+                summaryText += '<td>' + (i + 1) + '</td>';
+                summaryText += '<td>' + FlightLocation[0] + '</td>';
+                summaryText += '<td>' + FlightLocation[1] + '</td>';
+                summaryText += '<td>' + calc.pad(Math.round(calc.heading(coords[i], coords[i+1])), 3) + '</td>';
+                summaryText += '<td>' + distance.toFixed(1) + '</td>';
+                summaryText += '<td>' + Math.round(layer.speeds[i]) + '</td>';
+                if (layer.altitudes[i] == layer.altitudes[i+1]) {
+                    summaryText += '<td>' + Math.round(layer.altitudes[i]) + '</td>';
+                }
+                else {
+                    summaryText += '<td>' + Math.round(layer.altitudes[i]) + '->' + Math.round(layer.altitudes[i+1]) + '</td>';
+                }
+
+                summaryText += '<td>' + util.formatTime(time) + '</td>';
+                summaryText += '</tr>';
+            }
+
+            var FlightLocation = calc.latLngGrid(coords[i], mapConfig);
+            summaryText += '<tr>';
+            summaryText += '<td>END</td>';
+            summaryText += '<td>' + FlightLocation[0] + '</td>';
+            summaryText += '<td>' + FlightLocation[1] + '</td>';
+            summaryText += '<td></td>';
+            summaryText += '<td></td>';
+            summaryText += '<td></td>';
+            summaryText += '<td>' + Math.round(layer.altitudes[i]) + '</td>';
+            summaryText += '<td></td>';
+            summaryText += '</tr>';
+
+            summaryText += '</table></ol>';
 
             return summaryText;
         },
@@ -134,7 +198,6 @@ module.exports = (function() {
         },
 
         validUrl: function(string) {
-            var url = require('url');
             var result;
   
             try {
@@ -197,21 +260,10 @@ module.exports = (function() {
         },
         // End class functions
 
-        // Download function taken from here https://stackoverflow.com/questions/2897619/using-html5-javascript-to-generate-and-save-a-file
         download: function(filename, text) {
-            var pom = document.createElement('a');
-            pom.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
-            pom.setAttribute('download', filename);
-
-            if (document.createEvent) {
-                var event = document.createEvent('MouseEvents');
-                event.initEvent('click', true, true);
-                pom.dispatchEvent(event);
-            }
-            else {
-                pom.click();
-            }
-        }, // End download function
+            var blob = new Blob([text], {type: "text/plain;charset=utf-8"});
+            saveAs(blob, filename);
+        },
 
         csvConvert: function(array) {
             var csv="";
@@ -284,3 +336,5 @@ module.exports = (function() {
 
     };
 })();
+
+export default util;

@@ -1,6 +1,5 @@
+import content from "./content.js";
 (function() {
-
-    var content = require('./content.js');
 
     L.Control.TitleControl = L.Control.extend({
 

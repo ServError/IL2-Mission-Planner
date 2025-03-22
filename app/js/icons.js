@@ -1,4 +1,4 @@
-module.exports = function(leaflet) {
+const icons = function(leaflet) {
 /* // Prep work for future icon selection cleanup
     var iconGroups = {
         "Legacy": {
@@ -80,3 +80,5 @@ module.exports = function(leaflet) {
         }
     };
 };
+
+export default icons;

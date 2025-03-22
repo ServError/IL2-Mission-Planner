@@ -1,8 +1,23 @@
-module.exports = (function() {
+import flightModalHtml from "../html/flightModal.html";
+import flightTurnModalHtml from "../html/flightTurnModal.html";
+import flightLegModalHtml from "../html/flightLegModal.html";
+import flightSummaryModalHtml from "../html/flightSummaryModal.html";
+import circleModalHtml from "../html/circleModal.html";
+import polygonModalHtml from "../html/polygonModal.html";
+import confirmClearModalHtml from "../html/confirmClearModal.html";
+import helpModalHtml from "../html/helpModal.html";
+import pointModalHtml from "../html/pointModal.html";
+import importModalHtml from "../html/importModal.html";
+import gridJumpModalHtml from "../html/gridJumpModal.html";
+import settingsModalHtml from "../html/settingsModal.html";
+import streamModalHtml from "../html/streamModal.html";
+import startStreamModalHtml from "../html/startStreamModal.html";
+import connectStreamModalHtml from "../html/connectStreamModal.html";
+import alreadyConnectedModalHtml from "../html/alreadyConnectedModal.html";
+import alreadyStreamingModalHtml from "../html/alreadyStreamingModal.html";
+import conf from '../../dist/conf.json' with { type: "json" };
 
-    var fs = require('fs');
-
-    var conf = JSON.parse(fs.readFileSync('dist/conf.json', 'utf8'));
+const content = (function() {
 
     var mapConfigs = {
         stalingrad: {
@@ -248,15 +263,23 @@ module.exports = (function() {
     };
 
     var validatinatorConfig = {
-        'grid-jump-form': {
-            'grid-input': 'digitsLength:4'
+        '#grid-jump-form': {
+            '#grid-input': 'digitsLength:4'
         },
-        'flight-leg-form': {
-            'flight-leg-speed': 'between:0,9999'
+        '#flight-plan-form': {
+            '#flight-name': 'minLength:1|maxLength:50',
+            '#flight-speed': 'between:0,9999',
+            '#flight-altitude': 'between:0,999999'
         },
-        'connect-form': {
-            'stream-password': 'required',
-            'stream-code': 'requiredIf:leader-checkbox:checked'
+        '#flight-leg-form': {
+            '#flight-leg-speed': 'between:0,9999'
+        },
+        '#flight-turn-form': {
+            '#flight-turn-altitude': 'between:0,999999'
+        },
+        '#connect-form': {
+            '#stream-password': 'required',
+            '#stream-code': 'requiredIf:leader-checkbox:checked'
         }
     };
 
@@ -264,7 +287,7 @@ module.exports = (function() {
         maps: mapConfigs,
         default: defaults,
         validatinatorConfig: validatinatorConfig,
-        titleText: 'IL-2 Mission Planner <a href="https://github.com/ServError/il2missionplanner.com">Revived</a>',
+        titleText: 'IL-2 Mission Planner <a href="https://github.com/ServError/il2missionplanner.com">Revived 3.0</a>',
         helpTooltip: 'How to use this tool',
         clearTooltip: 'Clear the map',
         exportTooltip: 'Export mission plan',
@@ -276,22 +299,24 @@ module.exports = (function() {
         settingsTooltip: 'Settings',
         stopwatchTooltip: 'Stopwatch',
         streamTooltip: (conf.streaming === true) ? 'Stream mission plan' : 'Streaming disabled on this server',
-        flightModalTemplate: fs.readFileSync('app/html/flightModal.html', 'utf8'),
-        flightTurnModalTemplate: fs.readFileSync('app/html/flightTurnModal.html', 'utf8'),
-        flightLegModalTemplate: fs.readFileSync('app/html/flightLegModal.html', 'utf8'),
-        flightSummaryModalTemplate: fs.readFileSync('app/html/flightSummaryModal.html', 'utf8'),
-        circleModalTemplate: fs.readFileSync('app/html/circleModal.html', 'utf8'),
-        polygonModalTemplate: fs.readFileSync('app/html/polygonModal.html', 'utf8'),
-        confirmClearModalTemplate: fs.readFileSync('app/html/confirmClearModal.html', 'utf8'),
-        helpModalTemplate: fs.readFileSync('app/html/helpModal.html', 'utf8'),
-        pointModalTemplate: fs.readFileSync('app/html/pointModal.html', 'utf8'),
-        importModalTemplate: fs.readFileSync('app/html/importModal.html', 'utf8'),
-        gridJumpModalTemplate: fs.readFileSync('app/html/gridJumpModal.html', 'utf8'),
-        settingsModalTemplate: fs.readFileSync('app/html/settingsModal.html', 'utf8'),
-        streamModalTemplate: fs.readFileSync('app/html/streamModal.html', 'utf8'),
-        startStreamModalTemplate: fs.readFileSync('app/html/startStreamModal.html', 'utf8'),
-        connectStreamModalTemplate: fs.readFileSync('app/html/connectStreamModal.html', 'utf8'),
-        alreadyConnectedModalTemplate: fs.readFileSync('app/html/alreadyConnectedModal.html', 'utf8'),
-        alreadyStreamingModalTemplate: fs.readFileSync('app/html/alreadyStreamingModal.html', 'utf8')
+        flightModalTemplate: flightModalHtml,
+        flightTurnModalTemplate: flightTurnModalHtml,
+        flightLegModalTemplate: flightLegModalHtml,
+        flightSummaryModalTemplate: flightSummaryModalHtml,
+        circleModalTemplate: circleModalHtml,
+        polygonModalTemplate: polygonModalHtml,
+        confirmClearModalTemplate: confirmClearModalHtml,
+        helpModalTemplate: helpModalHtml,
+        pointModalTemplate: pointModalHtml,
+        importModalTemplate: importModalHtml,
+        gridJumpModalTemplate: gridJumpModalHtml,
+        settingsModalTemplate: settingsModalHtml,
+        streamModalTemplate: streamModalHtml,
+        startStreamModalTemplate: startStreamModalHtml,
+        connectStreamModalTemplate: connectStreamModalHtml,
+        alreadyConnectedModalTemplate: alreadyConnectedModalHtml,
+        alreadyStreamingModalTemplate: alreadyStreamingModalHtml
     };
 })();
+
+export default content;

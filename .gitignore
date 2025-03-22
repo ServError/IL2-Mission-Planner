@@ -10,3 +10,4 @@ sandbox/
 secrets/
 lambda/requests/
 .idea/
+tile-temp/
