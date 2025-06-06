@@ -247,7 +247,26 @@ const content = (function() {
             maxZoom: 6,
             tileUrl: conf.tilesUrl + '/western_front/{z}/{x}/{y}.png'
             //tileUrl: 'http://localhost:5001/western_front/{z}/{x}/{y}.png'
-        }
+        },
+        odessa: {
+            fullName: 'Odessa',
+            name: 'odessa',
+            hash: '#odessa',
+            selectIndex: 12,
+            scale: 1.5992,
+            latMin: -193,
+            latMax: 0,
+            latGridMax: 31,
+            lngMin: 0,
+            lngMax: 193,
+            lngGridMax: 31,
+            gridHopZoom: 6,
+            defaultZoom: 3,
+            minZoom: 2,
+            maxZoom: 7,
+            tileUrl: conf.tilesUrl + '/odessa/{z}/{x}/{y}.png'
+            //tileUrl: 'http://localhost:5001/odessa/{z}/{x}/{y}.png'
+        },
     };
 
     var defaults = {

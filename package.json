@@ -67,7 +67,7 @@
     "watch:js": "watch-run -p 'app/js/**/*.js' npm run dist:js:dev",
     "watch:html": "watch-run -p 'app/html/**/*.html' npm run dist:js:dev",
     "watch:img": "watch-run -p 'app/img/dist/*' npm run copy:img",
-    "develop": "npm run clean && npm run dist:dev && concurrently \"npm run watch:conf\" \"npm run watch:css\" \"npm run watch:index\" \"npm run watch:js\" \"npm run watch:html\" \"npm run watch:img\" \"npm run reload\" \"serve dist\"",
+    "develop": "npm run dist:dev && concurrently \"npm run watch:conf\" \"npm run watch:css\" \"npm run watch:index\" \"npm run watch:js\" \"npm run watch:html\" \"npm run watch:img\" \"npm run reload\" \"serve dist\"",
     "dist:css": "",
     "dist:cssbak": "cleancss -o dist/index.css app/css/index.css",
     "nodist": "npm run lint && npm test",
