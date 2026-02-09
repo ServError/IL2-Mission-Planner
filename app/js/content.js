@@ -283,7 +283,7 @@ const content = (function() {
             defaultZoom: 3,
             minZoom: 2,
             maxZoom: 7,
-            tileUrl: conf.tilesUrl + '/odessa/{z}/{x}/{y}.png'
+            tileUrl: conf.tilesUrl + '/karelia/{z}/{x}/{y}.png'
             //tileUrl: 'http://localhost:5001/karelia/{z}/{x}/{y}.png'
         },
     };
