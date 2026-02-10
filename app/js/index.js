@@ -132,6 +132,7 @@ const icons = icons_unmapped(L);
                     drawnItems.removeLayer(circle);
                 }
                 checkButtonsDisabled();
+                publishMapState();
             }
         });
     }
@@ -194,6 +195,7 @@ const icons = icons_unmapped(L);
                     drawnItems.removeLayer(polygon);
                 }
                 checkButtonsDisabled();
+                publishMapState();
             }
         });
     }
@@ -485,7 +487,7 @@ const icons = icons_unmapped(L);
         nameMarker.on('click', routeClickHandlerFactory(route));
         nameMarker.addTo(drawnMarkers);
         */
-        publishMapState();
+        //publishMapState(); // Now handled in applyFlightPlan
     }
 
     function applyFlightPlan(route) {
@@ -587,6 +589,7 @@ const icons = icons_unmapped(L);
                     applyFlightPlanCallback(route, newFlight);
                 }
                 checkButtonsDisabled();
+                publishMapState();
             }
         });
     }
@@ -1715,12 +1718,14 @@ const icons = icons_unmapped(L);
                                     var code, response;
                                     var checkbox = document.getElementById('leader-checkbox');
                                     if (checkbox.checked) {
-                                        if (V.fails('connect-form')) {
-                                            var errorElement = document.getElementById('connect-stream-error');
-                                            errorElement.innerHTML = 'Password and code are required to connect.';
-                                            util.removeClass(errorElement, 'hidden-section');
-                                            return;
-                                        }
+                                        V.validate('#connect-form').then((validationResult) => {
+                                            if (validationResult.invalid) {
+                                                var errorElement = document.getElementById('connect-stream-error');
+                                                errorElement.innerHTML = 'Password and code are required to connect.';
+                                                util.removeClass(errorElement, 'hidden-section');
+                                                return;
+                                            }
+                                        });
                                         code = document.getElementById('stream-code').value;
                                         response = webdis.getStreamReconnect(selectedStream, password, code);
                                         if (response[0] !== 'SUCCESS') {
@@ -1735,12 +1740,14 @@ const icons = icons_unmapped(L);
                                         state.streaming = true;
                                         util.addClass(document.querySelector('a.fa-share-alt'), 'streaming');
                                     } else {
-                                        if (V.fails('connect-form')) {
-                                            var errorElement = document.getElementById('connect-stream-error');
-                                            errorElement.innerHTML = 'Password is required to connect.';
-                                            util.removeClass(errorElement, 'hidden-section');
-                                            return;
-                                        }
+                                        V.validate('#connect-form').then((validationResult) => {
+                                            if (validationResult.invalid) {
+                                                var errorElement = document.getElementById('connect-stream-error');
+                                                errorElement.innerHTML = 'Password is required to connect.';
+                                                util.removeClass(errorElement, 'hidden-section');
+                                                return;
+                                            }
+                                        });
                                         response = webdis.getStreamInfo(selectedStream, password);
                                         if (response[0] !== 'SUCCESS') {
                                             var errorElement = document.getElementById('connect-stream-error');
