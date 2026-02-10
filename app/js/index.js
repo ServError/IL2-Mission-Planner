@@ -65,8 +65,18 @@ const icons = icons_unmapped(L);
         connected: false,
         changing: false,
         streamInfo: {},
-        streamingAvailable: (conf.streaming === true) ? webdis.init() : false
+        streamingAvailable: false
     };
+
+    if (conf.streaming === true) {
+        // initialize webdis asynchronously to avoid blocking the UI when server is down
+        webdis.init().then(function(available) {
+            state.streamingAvailable = !!available;
+            endConnectedMode();
+        }).catch(function() {
+            state.streamingAvailable = false;
+        });
+    }
 
     // Initialize form validation
     var V = new Validatinator(content.validatinatorConfig);
@@ -864,7 +874,7 @@ const icons = icons_unmapped(L);
             enableButtons(buttons);
         }
         buttons = ['stream-button'];
-        if (conf.streaming !== true) {
+        if (!state.streamingAvailable) {
             disableButtons(buttons);
         }
         buttons = ['summary-button', 'export-excel-button'];
@@ -1642,7 +1652,7 @@ const icons = icons_unmapped(L);
                         fireAlreadyConnectedModal();
                     }
                     function fireStreamModal() {
-                        if (conf.streaming === true) {
+                        if (state.streamingAvailable === true) {
                             map.openModal({
                                 template: template,
                                 onShow: function(e) {

@@ -18,16 +18,36 @@ const webdis = (function() {
             getReconnect: ''
         },
 
-        init: function() {
+        _fetchJson: async function(url, timeoutMs = 5000) {
+            const controller = new AbortController();
+            const id = setTimeout(() => controller.abort(), timeoutMs);
+            try {
+                const resp = await fetch(url, { signal: controller.signal });
+                clearTimeout(id);
+                if (!resp.ok) throw new Error('HTTP ' + resp.status);
+                return await resp.json();
+            } catch (e) {
+                clearTimeout(id);
+                throw e;
+            }
+        },
+
+        init: async function(timeoutMs = 5000) {
             var requiredKeys = Object.keys(this.scripts);
-            var response = this.hmget('scripts', requiredKeys);
-            if (response.length !== requiredKeys.length) {
+            try {
+                var url = this._buildHmgetUrl('scripts', requiredKeys);
+                var json = await this._fetchJson(url, timeoutMs);
+                var response = json.HMGET || [];
+                if (response.length !== requiredKeys.length) {
+                    return false;
+                }
+                for (var i = 0; i < response.length; i++) {
+                    this.scripts[requiredKeys[i]] = response[i];
+                }
+                return true;
+            } catch (e) {
                 return false;
             }
-            for (var i = 0; i < response.length; i++) {
-                this.scripts[requiredKeys[i]] = response[i];
-            }
-            return true;
         },
 
         publish: function(stream, password, code, state) {
