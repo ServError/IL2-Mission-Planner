@@ -51,7 +51,8 @@ const webdis = (function() {
         },
 
         publish: function(stream, password, code, state) {
-            var url = this._buildEvalshaUrl(this.scripts.publishState, [stream, password, code, state]);
+            var safeState = String(state).replace(/\//g, '%2f').replace(/\./g, '%2e');
+            var url = this._buildEvalshaUrl(this.scripts.publishState, [stream, password, code, safeState]);
             var xhr = util.buildGetXhr(url, function(){
                 if (xhr.readyState === 4) {
                     var responseBody = JSON.parse(xhr.responseText).EVALSHA;

@@ -1121,6 +1121,7 @@ const icons = icons_unmapped(L);
             }
 
         }
+        publishMapState();
     }
 
     function publishMapState() {
