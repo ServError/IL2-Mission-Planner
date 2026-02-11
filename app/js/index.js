@@ -68,6 +68,9 @@ const icons = icons_unmapped(L);
         streamingAvailable: false
     };
 
+    // timer id for debouncing publishMapState calls
+    var _publishMapStateTimer = null;
+
     if (conf.streaming === true) {
         // initialize webdis asynchronously to avoid blocking the UI when server is down
         webdis.init().then(function(available) {
@@ -715,12 +718,12 @@ const icons = icons_unmapped(L);
                 colorSelect.value = target.color;
                 var photoSelect = document.getElementById('target-photo');
                 photoSelect.value = target.photo;
-                L.DomEvent.on(e.modal._container.querySelector('.modal-test-photo'), 'click', function() {
-                    
+                L.DomEvent.on(e.modal._container.querySelector('.modal-test-photo'), 'click', async function() {
                     if (util.validUrl(photoSelect.value)){
-                        var xhr = util.buildGetBlobXhr(photoSelect.value, function() {
-                            if (xhr.status === 200){
-                                if (xhr.response !== "") {
+                        try {
+                            var resp = await util.fetchBlob(photoSelect.value);
+                            if (resp.status === 200){
+                                if (resp.response !== "") {
                                     target.photo = photoSelect.value;
                                     validPhoto = true;
                                     util.removeClass(document.getElementById('photo-status-hidden'), 'hidden-section');
@@ -736,7 +739,11 @@ const icons = icons_unmapped(L);
                                 validPhoto = false;
                                 util.addClass(document.getElementById('photo-status-hidden'), 'hidden-section');
                             }
-                        });
+                        } catch (e) {
+                            photoSelect.value = "failed, try again";
+                            validPhoto = false;
+                            util.addClass(document.getElementById('photo-status-hidden'), 'hidden-section');
+                        }
                     } else {
                         photoSelect.value = "failed, try again";
                         validPhoto = false;
@@ -1017,7 +1024,9 @@ const icons = icons_unmapped(L);
     }
 
     function fitViewToMission() {
-        map.flyToBounds(drawnItems.getBounds());
+        if (!mapIsEmpty()) {
+            map.flyToBounds(drawnItems.getBounds());
+        }
     }
 
     function getMapTextClasses(state) {
@@ -1125,10 +1134,42 @@ const icons = icons_unmapped(L);
     }
 
     function publishMapState() {
-        if (state.streaming) {
-            var saveData = exportMapState();
-            webdis.publish(state.streamInfo.name, state.streamInfo.password,
-                    state.streamInfo.code, window.escape(JSON.stringify(saveData)));
+        // debounce publishes: wait for 2s of inactivity before sending
+        if (_publishMapStateTimer) {
+            clearTimeout(_publishMapStateTimer);
+            _publishMapStateTimer = null;
+        }
+
+        if (!state.streaming) {
+            // nothing to do when not streaming; ensure no pending timer
+            return;
+        }
+
+        _publishMapStateTimer = setTimeout(function() {
+            try {
+                var saveData = exportMapState();
+                webdis.publish(state.streamInfo.name, state.streamInfo.password,
+                        state.streamInfo.code, window.escape(JSON.stringify(saveData)));
+            } finally {
+                _publishMapStateTimer = null;
+            }
+        }, 2000);
+    }
+
+    // Force-send any pending publish immediately.
+    function flushPublishMapState() {
+        if (_publishMapStateTimer) {
+            clearTimeout(_publishMapStateTimer);
+            _publishMapStateTimer = null;
+            if (state.streaming) {
+                try {
+                    var saveData = exportMapState();
+                    webdis.publish(state.streamInfo.name, state.streamInfo.password,
+                            state.streamInfo.code, window.escape(JSON.stringify(saveData)));
+                } catch (e) {
+                    // ignore publish errors here; _errorHandler will manage connection issues
+                }
+            }
         }
     }
 
@@ -1196,22 +1237,21 @@ const icons = icons_unmapped(L);
         }
 
         if(url !== ""){
-            var xhr = util.buildGetXhr(url, function() {
-                if (xhr.readyState === 4){
-                    if (xhr.response !== "") {
-                        responseBody = JSON.parse(xhr.responseText);
+            (async function(){
+                try {
+                    var resp = await util.fetchText(url);
+                    if (resp.status === 200 && resp.responseText !== "") {
+                        responseBody = JSON.parse(resp.responseText);
                         importMapState(responseBody, false);
                         fitViewToMission();
                         checkButtonsDisabled();
-                    }
-                    else {
+                    } else {
                         window.location.hash = "";
                     }
-                }
-                else {
+                } catch(e) {
                     window.location.hash = "";
                 }
-            });
+            })();
         }
     }
 
@@ -1678,7 +1718,43 @@ const icons = icons_unmapped(L);
                             template: content.startStreamModalTemplate,
                             onShow: function(e) {
                                 document.getElementById('stream-start-confirm-button').focus();
-                                L.DomEvent.on(document.getElementById('stream-start-confirm-button'), 'click', function() {
+                                // auto-generate credentials
+                                function randChoice(chars) { return chars.charAt(Math.floor(Math.random() * chars.length)); }
+                                function genStreamName() {
+                                    const chars = 'abcdefghijkmnopqrstuvwxyz23456789';
+                                    let s = '';
+                                    for (let i=0;i<4;i++) s += randChoice(chars);
+                                    return s;
+                                }
+                                function genLower6() {
+                                    const chars = 'abcdefghijkmnopqrstuvwxyz23456789';
+                                    let s = '';
+                                    for (let i=0;i<6;i++) s += randChoice(chars);
+                                    return s;
+                                }
+                                var nameEl = document.getElementById('stream-name');
+                                var passEl = document.getElementById('stream-password');
+                                var codeEl = document.getElementById('stream-leader-code');
+                                nameEl.value = genStreamName();
+                                passEl.value = genLower6();
+                                codeEl.value = genLower6();
+                                // copy buttons
+                                var copy = function(text, button) {
+                                    if (navigator.clipboard && navigator.clipboard.writeText) {
+                                        navigator.clipboard.writeText(text).then(function(){
+                                            var old = button.innerText;
+                                            button.innerText = 'Copied';
+                                            setTimeout(function(){ button.innerText = old; }, 1200);
+                                        });
+                                    }
+                                };
+                                var btnName = document.getElementById('copy-stream-name');
+                                var btnPass = document.getElementById('copy-stream-password');
+                                var btnCode = document.getElementById('copy-stream-code');
+                                btnName.onclick = function(){ copy(nameEl.value, btnName); };
+                                btnPass.onclick = function(){ copy(passEl.value, btnPass); };
+                                btnCode.onclick = function(){ copy(codeEl.value, btnCode); };
+                                L.DomEvent.on(document.getElementById('stream-start-confirm-button'), 'click', async function() {
                                     var streamName = document.getElementById('stream-name').value;
                                     var streamPassword = document.getElementById('stream-password').value;
                                     var streamCode = document.getElementById('stream-leader-code').value;
@@ -1689,7 +1765,7 @@ const icons = icons_unmapped(L);
                                         return;
                                     }
                                     var mapState = window.escape(JSON.stringify(exportMapState()));
-                                    var response = webdis.startStream(streamName, streamPassword, streamCode, mapState);
+                                    var response = await webdis.startStream(streamName, streamPassword, streamCode, mapState);
                                     if (response[0] !== 'SUCCESS')  {
                                         var errorElement = document.getElementById('start-stream-error');
                                         errorElement.innerHTML = response[1];
@@ -1714,17 +1790,11 @@ const icons = icons_unmapped(L);
                     function fireConnectModal() {
                         map.openModal({
                             template: content.connectStreamModalTemplate,
-                            onShow: function(e) {
-                                var streamSelect = document.getElementById('stream-select');
-                                var streams = webdis.getStreamList();
-                                streamSelect.options.length = 0;
-                                for (var i=0; i < streams.length; i++) {
-                                    streamSelect.options[i] = new Option(streams[i].substring(7), streams[i].substring(7));
-                                }
+                            onShow: async function(e) {
                                 setupCheckboxTogglableElement('leader-checkbox', 'leader-hidden');
                                 document.getElementById('stream-connect-button').focus();
-                                L.DomEvent.on(document.getElementById('stream-connect-button'), 'click', function() {
-                                    var selectedStream = streamSelect.options[streamSelect.selectedIndex].value;
+                                L.DomEvent.on(document.getElementById('stream-connect-button'), 'click', async function() {
+                                    var name = document.getElementById('stream-name').value;
                                     var password = document.getElementById('stream-password').value;
                                     var code, response;
                                     var checkbox = document.getElementById('leader-checkbox');
@@ -1732,13 +1802,13 @@ const icons = icons_unmapped(L);
                                         V.validate('#connect-form').then((validationResult) => {
                                             if (validationResult.invalid) {
                                                 var errorElement = document.getElementById('connect-stream-error');
-                                                errorElement.innerHTML = 'Password and code are required to connect.';
+                                                errorElement.innerHTML = 'valid name, password, and code are required to connect.';
                                                 util.removeClass(errorElement, 'hidden-section');
                                                 return;
                                             }
                                         });
                                         code = document.getElementById('stream-code').value;
-                                        response = webdis.getStreamReconnect(selectedStream, password, code);
+                                        response = await webdis.getStreamReconnect(name, password, code);
                                         if (response[0] !== 'SUCCESS') {
                                             var errorElement = document.getElementById('connect-stream-error');
                                             errorElement.innerHTML = response[1];
@@ -1759,22 +1829,23 @@ const icons = icons_unmapped(L);
                                                 return;
                                             }
                                         });
-                                        response = webdis.getStreamInfo(selectedStream, password);
+                                        response = await webdis.getStreamInfo(name, password);
                                         if (response[0] !== 'SUCCESS') {
                                             var errorElement = document.getElementById('connect-stream-error');
                                             errorElement.innerHTML = response[1];
                                             util.removeClass(errorElement, 'hidden-section');
                                             return;
                                         }
-                                        webdis.subscribe(response[1]);
+                                        webdis.subscribe(response[1], { stream: name, password: password, code: code });
                                         clearMap();
                                         importMapState(JSON.parse(response[2]), false);
                                         state.connected = response[1];
                                         util.addClass(document.querySelector('a.fa-share-alt'), 'connected');
                                         startConnectedMode();
+                                        fitViewToMission();
                                     }
                                     state.streamInfo = {
-                                        name: selectedStream,
+                                        name: name,
                                         password: password,
                                         code: code
                                     };
@@ -1792,6 +1863,19 @@ const icons = icons_unmapped(L);
                             streamName: state.streamInfo.name,
                             template: content.alreadyConnectedModalTemplate,
                             onShow: function(e) {
+                                var nameInput = e.modal._container.querySelector('#already-stream-name');
+                                if (nameInput) nameInput.value = (state.streamInfo && state.streamInfo.name) ? state.streamInfo.name : '';
+                                var copyBtnName = e.modal._container.querySelector('#copy-already-name');
+                                var doCopy = function(text, button) {
+                                    if (navigator.clipboard && navigator.clipboard.writeText) {
+                                        navigator.clipboard.writeText(text).then(function(){
+                                            var old = button.innerText;
+                                            button.innerText = 'Copied';
+                                            setTimeout(function(){ button.innerText = old; }, 1200);
+                                        });
+                                    }
+                                };
+                                if (copyBtnName && nameInput) copyBtnName.onclick = function(){ doCopy(nameInput.value, copyBtnName); };
                                 document.getElementById('disconnect-button').focus();
                                 L.DomEvent.on(document.getElementById('disconnect-button'), 'click', function() {
                                     webdis.unsubscribe(state.connected);
@@ -1814,9 +1898,38 @@ const icons = icons_unmapped(L);
                             template: content.alreadyStreamingModalTemplate,
                             onShow: function(e) {
                                 document.getElementById('stop-streaming-button').focus();
-                                setupCheckboxTogglableElement('already-streaming-checkbox', 'already-streaming-hidden');
+                                // initialize password/code rows and copy buttons
+                                var pwCheckboxId = 'already-streaming-password-checkbox';
+                                var pwRowId = 'already-streaming-password-row';
+                                var codeCheckboxId = 'already-streaming-code-checkbox';
+                                var codeRowId = 'already-streaming-code-row';
+                                setupCheckboxTogglableElement(pwCheckboxId, pwRowId);
+                                setupCheckboxTogglableElement(codeCheckboxId, codeRowId);
+                                var nameInput = e.modal._container.querySelector('#already-stream-name');
+                                var pwInput = e.modal._container.querySelector('#already-stream-password');
+                                var codeInput = e.modal._container.querySelector('#already-stream-code');
+                                if (nameInput) nameInput.value = (state.streamInfo && state.streamInfo.name) ? state.streamInfo.name : '';
+                                if (pwInput) pwInput.value = (state.streamInfo && state.streamInfo.password) ? state.streamInfo.password : '';
+                                if (codeInput) codeInput.value = (state.streamInfo && state.streamInfo.code) ? state.streamInfo.code : '';
+                                var copyBtnName = e.modal._container.querySelector('#copy-already-name');
+                                var copyBtnPw = e.modal._container.querySelector('#copy-already-password');
+                                var copyBtnCode = e.modal._container.querySelector('#copy-already-code');
+                                var doCopy = function(text, button) {
+                                    if (navigator.clipboard && navigator.clipboard.writeText) {
+                                        navigator.clipboard.writeText(text).then(function(){
+                                            var old = button.innerText;
+                                            button.innerText = 'Copied';
+                                            setTimeout(function(){ button.innerText = old; }, 1200);
+                                        });
+                                    }
+                                };
+                                if (copyBtnName && nameInput) copyBtnName.onclick = function(){ doCopy(nameInput.value, copyBtnName); };
+                                if (copyBtnPw && pwInput) copyBtnPw.onclick = function(){ doCopy(pwInput.value, copyBtnPw); };
+                                if (copyBtnCode && codeInput) copyBtnCode.onclick = function(){ doCopy(codeInput.value, copyBtnCode); };
                                 L.DomEvent.on(document.getElementById('stop-streaming-button'), 'click', function() {
                                     e.modal.hide();
+                                    // flush any pending publish before stopping
+                                    try { flushPublishMapState(); } catch(e) {}
                                     state.streaming = false;
                                     util.removeClass(document.querySelector('a.fa-share-alt'), 'streaming');
                                 });
@@ -1872,9 +1985,7 @@ const icons = icons_unmapped(L);
                 icon: 'fa-crop',
                 tooltip: content.missionHopTooltip,
                 clickFn: function() {
-                    if (!mapIsEmpty()) {
-                        fitViewToMission();
-                    }
+                    fitViewToMission();
                 }
             }
         ]
@@ -1968,7 +2079,6 @@ const icons = icons_unmapped(L);
         }
         var saveData = e.detail;
         if (saveData !== 1) {
-            clearMap();
             importMapState(JSON.parse(saveData), false);
         }
         util.removeClass(document.querySelector('a.fa-share-alt'), 'stream-error');

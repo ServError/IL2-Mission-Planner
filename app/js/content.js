@@ -316,6 +316,7 @@ const content = (function() {
             '#flight-turn-altitude': 'between:0,999999'
         },
         '#connect-form': {
+            '#stream-name': 'minLength:4|maxLength:4',
             '#stream-password': 'required',
             '#stream-code': 'requiredIf:leader-checkbox:checked'
         }

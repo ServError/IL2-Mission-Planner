@@ -251,3 +251,18 @@ table, th, td {
 th, td {
     text-align: center;
 }
+
+/* Start stream modal: make header and inputs match size */
+#stream-modal h2 {
+    font-size: 1.5em;
+}
+#stream-modal .input-with-button input,
+#already-streaming-modal .input-with-button input {
+    font-size: 1.5em;
+    padding: 6px 8px;
+}
+#stream-modal .input-with-button .small-button,
+#already-streaming-modal .input-with-button .small-button {
+    font-size: 1em;
+    padding: 6px 8px;
+}

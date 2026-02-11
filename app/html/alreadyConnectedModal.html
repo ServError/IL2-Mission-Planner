@@ -9,9 +9,10 @@
             </p>
         </div>
         <div class="row">
-            <p>
-                <b>Stream Name: </b>{streamName}
-            </p>
+            <div class="input-with-button">
+                <input id="already-stream-name" class="half-width" readonly value="{streamName}"></input>
+                <button id="copy-already-name" type="button" class="small-button">Copy</button>
+            </div>
         </div>
         <div class="row buttom-row">
             <button id="disconnect-button" class="modal-ok button-primary" type="submit">Disconnect</button>

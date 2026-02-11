@@ -5,14 +5,10 @@
     <div id="connect-stream-error" class="row error-message hidden-section">
     </div>
     <form id="connect-form" name="connect-form" onsubmit="return false;">
-        <fieldset>
-            <legend>Select Stream</legend>
-            <div class="row">
-                <div class="one column"></div>
-                <select id="stream-select" class="eleven columns" id="stream-select">
-                </select>
-            </div>
-        </fieldset>
+        <div class="row">
+            <label for="stream-name">Stream name</label>
+            <input id="stream-name" name="stream-name" class="half-width" placeholder="name"></input>
+        </div>
         <div class="row">
             <label for="stream-password">Password</label>
             <input id="stream-password" name="stream-password" class="half-width" placeholder="password"></input>

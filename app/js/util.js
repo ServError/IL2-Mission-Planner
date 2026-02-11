@@ -209,28 +209,23 @@ const util = (function() {
             return result.protocol === "http:" || result.protocol === "https:";
         },
 
-        buildGetXhr: function(url, updateFn) {
-            var xhr = new XMLHttpRequest();
-            xhr.open('GET', url, true);
-            xhr.onreadystatechange = updateFn;
-            xhr.send(null);
-            return xhr;
-        },
-        
-        buildGetBlobXhr: function(url, updateFn) {
-            var xhr = new XMLHttpRequest();
-            xhr.open('GET', url, true);
-            xhr.responseType = 'blob';
-            xhr.onreadystatechange = updateFn;
-            xhr.send();
-            return xhr;
+        fetchText: async function(url) {
+            const resp = await fetch(url);
+            const text = await resp.text();
+            return { status: resp.status, ok: resp.ok, responseText: text, resp };
         },
 
-        buildSyncGetXhr: function(url) {
-            var xhr = new XMLHttpRequest();
-            xhr.open('GET', url, false);
-            xhr.send(null);
-            return xhr;
+        fetchBlob: async function(url) {
+            const resp = await fetch(url);
+            const blob = await resp.blob();
+            return { status: resp.status, ok: resp.ok, response: blob, resp };
+        },
+
+        fetchTextRaw: async function(url) {
+            // Formerly a synchronous XHR; now async fetch that returns a similar-shaped object.
+            const resp = await fetch(url);
+            const text = await resp.text();
+            return { status: resp.status, ok: resp.ok, responseText: text, resp };
         },
 
         // Class functions taken from here: http://jaketrent.com/post/addremove-classes-raw-javascript/

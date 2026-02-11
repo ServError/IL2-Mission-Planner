@@ -165,17 +165,17 @@ describe('util', function() {
         });
     });
 
-    describe('util.buildGetXhr', function() {
+    describe('util.fetchText', function() {
 
         it('must be defined', function() {
-            assert.isDefined(util.buildGetXhr);
+            assert.isDefined(util.fetchText);
         });
     });
 
-    describe('util.buildSyncGetXhr', function() {
+    describe('util.fetchTextRaw', function() {
 
         it('must be defined', function() {
-            assert.isDefined(util.buildSyncGetXhr);
+            assert.isDefined(util.fetchTextRaw);
         });
     });
 

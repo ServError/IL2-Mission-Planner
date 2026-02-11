@@ -9,25 +9,48 @@
             </p>
         </div>
         <div class="row">
-            <p>
-                <b>Stream Name: </b>{streamName}
-            </p>
+            <div class="input-with-button">
+                <input id="already-stream-name" class="half-width" readonly value="{streamName}"></input>
+                <button id="copy-already-name" type="button" class="small-button">Copy</button>
+            </div>
         </div>
         <div class="row">
             <div class="six columns">
-                <label class="checkbox-label" for="already-streaming-checkbox">
-                    Show password and leader code?
+                <label class="checkbox-label" for="already-streaming-password-checkbox">
+                    Show password
                 </label>
             </div>
             <div class="six columns">
-                <input id="already-streaming-checkbox" name="already-streaming-checkbox" type="checkbox">
+                <input id="already-streaming-password-checkbox" name="already-streaming-password-checkbox" type="checkbox">
             </div>
         </div>
-        <div id="already-streaming-hidden" class="row hidden-section">
-            <p>
-                <b>Password: </b>{streamPassword}<br>
-                <b>Leader Code: </b>{streamCode}
-            </p>
+        <div id="already-streaming-password-row" class="row hidden-section">
+            <div class="row">
+                <label for="already-stream-password">Password</label>
+                <div class="input-with-button">
+                    <input id="already-stream-password" class="half-width" readonly value="{streamPassword}"></input>
+                    <button id="copy-already-password" type="button" class="small-button">Copy</button>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="six columns">
+                <label class="checkbox-label" for="already-streaming-code-checkbox">
+                    Show leader code
+                </label>
+            </div>
+            <div class="six columns">
+                <input id="already-streaming-code-checkbox" name="already-streaming-code-checkbox" type="checkbox">
+            </div>
+        </div>
+        <div id="already-streaming-code-row" class="row hidden-section">
+            <div class="row">
+                <label for="already-stream-code">Leader Code</label>
+                <div class="input-with-button">
+                    <input id="already-stream-code" class="half-width" readonly value="{streamCode}"></input>
+                    <button id="copy-already-code" type="button" class="small-button">Copy</button>
+                </div>
+            </div>
         </div>
         <div class="row buttom-row">
             <button id="stop-streaming-button" class="modal-ok button-primary" type="submit">Stop Streaming</button>
