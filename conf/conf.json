@@ -1,7 +1,8 @@
 {
-  "apiUrl"    : "NONE",
   "serverUrl" : "https://www.example.com",
   "tilesUrl"  : "https://www.example.com/tiles",
   "streaming" : false,
-  "webdisUrl" : "https://www.example.com/WEBDIS"
+  "webdisUrl" : "https://www.example.com/WEBDIS",
+  "webdisUser": "",
+  "webdisPass": ""
 }

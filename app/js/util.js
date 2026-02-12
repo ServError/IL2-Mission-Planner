@@ -2,6 +2,7 @@ import url from "url";
 import calc from "./calc.js";
 import pkg from 'file-saver';
 const { saveAs } = pkg;
+import conf from '../../dist/conf.json' with { type: "json" };
 
 const util = (function() {
 
@@ -209,21 +210,44 @@ const util = (function() {
             return result.protocol === "http:" || result.protocol === "https:";
         },
 
+        _authHeaders: function(requestUrl) {
+            try {
+                if (!(conf && conf.webdisUser && conf.webdisPass && requestUrl && typeof requestUrl === 'string')) return {};
+                // If requestUrl clearly starts with configured webdisUrl, send auth
+                if (requestUrl.indexOf(conf.webdisUrl) === 0) {
+                    return { 'Authorization': 'Basic ' + btoa(conf.webdisUser + ':' + conf.webdisPass) };
+                }
+                // Otherwise, compare origins as a fallback (handles paths in conf.webdisUrl)
+                try {
+                    const reqOrigin = new URL(requestUrl).origin;
+                    const confOrigin = new URL(conf.webdisUrl).origin;
+                    if (reqOrigin === confOrigin) {
+                        return { 'Authorization': 'Basic ' + btoa(conf.webdisUser + ':' + conf.webdisPass) };
+                    }
+                } catch (e) {
+                    // ignore URL parse errors and do not send auth
+                }
+            } catch (e) {
+                // ignore any unexpected errors
+            }
+            return {};
+        },
+
         fetchText: async function(url) {
-            const resp = await fetch(url);
+            const resp = await fetch(url, { headers: this._authHeaders(url) });
             const text = await resp.text();
             return { status: resp.status, ok: resp.ok, responseText: text, resp };
         },
 
         fetchBlob: async function(url) {
-            const resp = await fetch(url);
+            const resp = await fetch(url, { headers: this._authHeaders(url) });
             const blob = await resp.blob();
             return { status: resp.status, ok: resp.ok, response: blob, resp };
         },
 
         fetchTextRaw: async function(url) {
             // Formerly a synchronous XHR; now async fetch that returns a similar-shaped object.
-            const resp = await fetch(url);
+            const resp = await fetch(url, { headers: this._authHeaders(url) });
             const text = await resp.text();
             return { status: resp.status, ok: resp.ok, responseText: text, resp };
         },

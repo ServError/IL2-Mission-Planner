@@ -11,6 +11,17 @@ const webdis = (function() {
 
     return {
 
+        _authHeaders: function() {
+            try {
+                if (conf && conf.webdisUser && conf.webdisPass) {
+                    return { 'Authorization': 'Basic ' + btoa(conf.webdisUser + ':' + conf.webdisPass) };
+                }
+            } catch (e) {
+                // ignore
+            }
+            return {};
+        },
+
         // active subscription tracking: channel -> { lastSeq, params, running }
         _subscriptions: {},
 
@@ -25,7 +36,7 @@ const webdis = (function() {
             const controller = new AbortController();
             const id = setTimeout(() => controller.abort(), timeoutMs);
             try {
-                const resp = await fetch(url, { signal: controller.signal });
+                const resp = await fetch(url, { signal: controller.signal, headers: this._authHeaders() });
                 clearTimeout(id);
                 if (!resp.ok) throw new Error('HTTP ' + resp.status);
                 return await resp.json();
@@ -96,7 +107,7 @@ const webdis = (function() {
 
             (async function(){
                 try {
-                    const resp = await fetch(url);
+                    const resp = await fetch(url, { headers: self._authHeaders() });
                     const reader = resp.body.getReader();
                     const decoder = new TextDecoder();
                     let buffer = '';

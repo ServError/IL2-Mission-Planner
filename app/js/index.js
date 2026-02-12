@@ -1206,34 +1206,12 @@ const icons = icons_unmapped(L);
         var responseBody = null;
         var url;
 
-        if (conf.apiUrl === 'NONE')
-        {
-            // Example of using a proxy to dodge CORS and HTTPS requirements
-            var cors_api_host = 'cors-anywhere.herokuapp.com';
-            var cors_api_url = 'https://' + cors_api_host + '/';
+        // Example of using a proxy to dodge CORS and HTTPS requirements
+        var cors_api_host = 'cors-anywhere.herokuapp.com';
+        var cors_api_url = 'https://' + cors_api_host + '/';
 
-            if ((window.location.hash.substring(0, 10) === '#json-url=') && (window.location.hash.length > 10)) {
-                url = /*cors_api_url +*/ window.location.hash.slice(10);
-            }
-            else
-            {
-                switch(window.location.hash){
-                    case "#combatbox":
-                        url = ""; // Must be https if we're serving from https
-                        break;
-                    case "#virtualpilots":
-                        url = ""; // TBD, must be https if we're serving from https
-                        break;
-                    default:
-                        // Check repository of mission jsons for a matching name
-                        url = "";
-                        window.location.hash = "";
-                }
-            }
-        }
-        else  // try to get json for that server if API server is enabled
-        {
-            url = conf.apiUrl + '/servers/' + window.location.hash.substr(1);
+        if ((window.location.hash.substring(0, 10) === '#json-url=') && (window.location.hash.length > 10)) {
+            url = /*cors_api_url +*/ window.location.hash.slice(10);
         }
 
         if(url !== ""){

@@ -18,7 +18,7 @@ Interested in contributing to this tool? Feel free to fork the project and open 
 
 ## Setting up
 
-Clone the repository. In the repository directory, run `npm ci` to fetch dependencies. Edit conf/conf.json to match your desired setup. I recommend starting with the defaults (streaming false and api set to NONE) and just substituting in your domain name. Run `npm run dist` to generate the files to push to your web server and optionally run `npm run tiles` to fetch the tiles from the 'dist' folder of [the tiles repo](https://github.com/ServError/tiles.il2missionplanner.com) and drop them into the tiles subdirectory of the output. Tiles only need to be fetched once.
+Clone the repository. In the repository directory, run `npm ci` to fetch dependencies. Edit conf/conf.json to match your desired setup. I recommend starting with the defaults (streaming false) and just substituting in your domain name. Run `npm run dist` to generate the files to push to your web server and optionally run `npm run tiles` to fetch the tiles from the 'dist' folder of [the tiles repo](https://github.com/ServError/tiles.il2missionplanner.com) and drop them into the tiles subdirectory of the output. Tiles only need to be fetched once.
 
 ## Live Development
 
@@ -32,7 +32,3 @@ Simply run `npm run dist` again after a `git pull` and merge the updated output 
 Use your package manager to download redis and webdis. Head to [the stream repo](https://github.com/ServError/stream.il2missionplanner.com) and grab the load_scripts.sh and contents of the lua folder. Nothing else in that repo is especially necessary, and I believe the stock redis and webdis configs are fine for our purposes. Make sure redis and webdis are configured to start on boot and check for failures (I needed a delay after the redis start or webdis complained) then edit the webdis service file to execute the load_scripts.sh script as a POSTEXEC and make sure it can see the lua files.
 
 Now configure your web host of choice to reverse proxy the webdis commands on their port. I sent them to a WEBDIS subfolder for ease of integration with the map server.
-
-### API Server
-
-You're mostly on your own here. It's not too hard to get the docker running, and after that you'd need to direct traffic between it and your map server. You may need to tweak your dockerhub images to something more recent or compatible with your server's architecture. I personally found it not worth it for the minimal functionality, and may reimplement it in a different way down the road.
