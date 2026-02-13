@@ -1,5 +1,5 @@
 import { assert } from 'chai';
-import conf from '../../dist/conf.json' with { type: "json" };
+import conf from '../../conf/conf.json' with { type: "json" };
 
 if (!CustomEvent) {
   var CustomEvent = function(name, params){ return params;};

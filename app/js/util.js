@@ -2,7 +2,7 @@ import url from "url";
 import calc from "./calc.js";
 import pkg from 'file-saver';
 const { saveAs } = pkg;
-import conf from '../../dist/conf.json' with { type: "json" };
+import conf from '../../conf/conf.json' with { type: "json" };
 
 const util = (function() {
 

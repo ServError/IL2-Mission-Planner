@@ -1,6 +1,6 @@
 //import confJson from "./dist/conf.json";
 import util from "./util.js";
-import conf from '../../dist/conf.json' with { type: "json" };
+import conf from '../../conf/conf.json' with { type: "json" };
 
 const webdis = (function() {
     //var util = require('./util.js');

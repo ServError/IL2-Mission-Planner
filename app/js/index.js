@@ -17,7 +17,7 @@ import content from "./content.js";
 import util from "./util.js";
 import webdis from "./webdis.js";
 import "./controls.js";
-import conf from '../../dist/conf.json' with { type: "json" };
+import conf from '../../conf/conf.json' with { type: "json" };
 import icons_unmapped from "./icons.js"; //(L)?
 
 import '../css/index.css';

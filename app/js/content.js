@@ -15,7 +15,7 @@ import startStreamModalHtml from "../html/startStreamModal.html";
 import connectStreamModalHtml from "../html/connectStreamModal.html";
 import alreadyConnectedModalHtml from "../html/alreadyConnectedModal.html";
 import alreadyStreamingModalHtml from "../html/alreadyStreamingModal.html";
-import conf from '../../dist/conf.json' with { type: "json" };
+import conf from '../../conf/conf.json' with { type: "json" };
 
 const content = (function() {
 
@@ -83,11 +83,11 @@ const content = (function() {
             hash: '#kuban',
             selectIndex: 3,
             scale: 2.876397232,
-            latMin: -100,
+            latMin: -99.94,
             latMax: 0,
             latGridMax: 28.8086,
             lngMin: 0,
-            lngMax: 143,
+            lngMax: 144.34,
             lngGridMax: 41.6104,
             gridHopZoom: 6,
             defaultZoom: 4,
@@ -102,11 +102,11 @@ const content = (function() {
             hash: '#rheinland',
             selectIndex: 4,
             scale: 2.876397232,
-            latMin: -111,
+            latMin: -112.55,
             latMax: 0,
             latGridMax: 32.4437,
             lngMin: 0,
-            lngMax: 139,
+            lngMax: 139.21,
             lngGridMax: 40.1306,
             gridHopZoom: 6,
             defaultZoom: 4,
@@ -159,11 +159,11 @@ const content = (function() {
             hash: '#normandy',
             selectIndex: 7,
             scale: 2.48099,
-            latMin: -138.1,
+            latMin: -139.87,
             latMax: 0,
             latGridMax: 34.6957,
             lngMin: 0,
-            lngMax: 125,
+            lngMax: 125.51,
             lngGridMax: 31.1337,
             gridHopZoom: 6,
             defaultZoom: 3,
@@ -178,11 +178,11 @@ const content = (function() {
             hash: '#normandy_early',
             selectIndex: 8,
             scale: 2.48099,
-            latMin: -138.1,
+            latMin: -139.87,
             latMax: 0,
             latGridMax: 34.6957,
             lngMin: 0,
-            lngMax: 125,
+            lngMax: 125.51,
             lngGridMax: 31.1337,
             gridHopZoom: 6,
             defaultZoom: 3,
